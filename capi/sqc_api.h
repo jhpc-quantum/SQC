@@ -269,7 +269,10 @@ int sqc_Transpile(sqc_ir* qcir, char* buf, unsigned int size,
 
 int sqc_Finalize()
 {
-  
+  Py_XDECREF(mng->pyLoads);
+  Py_XDECREF(mng->pyDumps);
+  Py_XDECREF(mng->pyTranspiler);
+  Py_Finalize();
   for(int i=0; i<CIRCUIT_NUM; i++){
     if(mng->c[i] != NULL){
         if(mng->c[i]->dump_str != NULL){
