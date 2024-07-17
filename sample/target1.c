@@ -4,17 +4,18 @@
 int main(int argc, char *argv[])
 {
   const int qubits = 2;
-  sqc_ir * qcir;
+  sqc_ir qcir;
   PROVIDERS provider = Fake20QV1;
   const int opt_level = 1;
 
-  sqc_Init(); 
+  sqc_Initialize(); 
 
   qcir = sqc_Circuit(qubits); /* 古典ビット数はqubitsと同数 */
 
   sqc_HGate(qcir, 0);
   sqc_CXGate(qcir, 0, 1);
-  sqc_Measure(qcir, 0, 1);
+  sqc_Measure(qcir, 0, 0);
+  sqc_Measure(qcir, 1, 1);
 
   char* str = (char *)malloc(500);
   int len = sqc_Dump(qcir, str, 500);
