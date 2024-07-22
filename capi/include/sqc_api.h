@@ -188,6 +188,7 @@ int sqc_Dump(sqc_ir qcir, char* buf, unsigned int size)
     return -1;
   }
   memcpy(buf, tmpbuf, tmpbuflen);
+  *(buf+tmpbuflen)='\0';
   free(tmpbuf);
   return (int)tmpbuflen;
 }
@@ -253,7 +254,7 @@ int sqc_Transpile(sqc_ir qcir, char* buf, unsigned int size,
     return -1;
   }
   memcpy(buf, qasm_str_transpiled, len);
-  *(buf+len)=0x00;
+  *(buf+len)='\0';
 
   Py_XDECREF(pyTranspiledStr);
   Py_XDECREF(pyTranspiledCircuit);
