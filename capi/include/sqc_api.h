@@ -31,7 +31,7 @@ char* provider_info[_NProviders][2] = {
   //{ "qiskit.providers.fake_provider", "GenericBackendV2" }
 };
 
-#define MAX_INFO 48
+
 #define MAX_N_GATES 128 
 #define MAX_I_ARGS  8
 #define MAX_R_ARGS  8
@@ -50,20 +50,19 @@ typedef struct{
   int           qubits;
   int            ngates; 
   gate_info      gate[MAX_N_GATES]; 
-  char*          dump_str;
 } sqc_info_t;
 
-typedef sqc_info_t sqc_ir;
+typedef sqc_info_t* sqc_ir;
 
-int sqc_Init();
-sqc_ir* sqc_Circuit(int qubits);
-int sqc_HGate(sqc_ir* qcir, int qubit_number);
-int sqc_CXGate(sqc_ir* qcir, int qubit_number1, int qubit_number2);
-int sqc_Measure(sqc_ir* qcir, int qubit_number, int clbit_number);
-int sqc_Dump(sqc_ir* qcir, char* buf, unsigned int size);
-int sqc_Transpile(sqc_ir* qcir, char* buf, unsigned int size,
+int sqc_Initialize(void);
+sqc_ir sqc_Circuit(int qubits);
+int sqc_HGate(sqc_ir qcir, int qubit_number);
+int sqc_CXGate(sqc_ir qcir, int qubit_number1, int qubit_number2);
+int sqc_Measure(sqc_ir qcir, int qubit_number, int clbit_number);
+int sqc_Dump(sqc_ir qcir, char* buf, unsigned int size);
+int sqc_Transpile(sqc_ir qcir, char* buf, unsigned int size,
 		  PROVIDERS provider, int opt_level);
-int sqc_Finalize();
+int sqc_Finalize(void);
 
 ////////////////////////////////  
 
@@ -80,7 +79,7 @@ enum enum_gates{
 
 #define CIRCUIT_NUM 10
 typedef struct{
-  sqc_ir* c[CIRCUIT_NUM];
+  sqc_ir c[CIRCUIT_NUM];
   int nsqc_irs;
   PyObject* pyLoads;
   PyObject* pyDumps;
@@ -89,9 +88,9 @@ typedef struct{
 
 mng_area* mng;
 
-void sqc_ir_to_qasm(sqc_ir* info, char *s);
+void sqc_ir_to_qasm(sqc_ir info, char *s);
 
-int sqc_Init()
+int sqc_Initialize(void)
 {
   mng = (mng_area*)malloc(sizeof(mng_area));
   mng->nsqc_irs = 0;
@@ -106,6 +105,7 @@ int sqc_Init()
   pyImportName = PyUnicode_DecodeFSDefault("qiskit.qasm3");
   PyObject *pyQiskit_qasm3 = PyImport_Import(pyImportName);
   PyErr_Print();
+  Py_XDECREF(pyImportName);
 
   pyImportName = PyUnicode_DecodeFSDefault("qiskit.compiler");
   PyObject *pyQiskit_compiler = PyImport_Import(pyImportName);
@@ -127,7 +127,7 @@ int sqc_Init()
   return 0;
 }
 
-sqc_ir* sqc_Circuit(int qubits)
+sqc_ir sqc_Circuit(int qubits)
 {
   int n = mng->nsqc_irs;
   if( n!=0 ) {
@@ -135,7 +135,7 @@ sqc_ir* sqc_Circuit(int qubits)
     return NULL;
   }
   
-  mng->c[n] = (sqc_ir*)malloc(sizeof(sqc_ir));
+  mng->c[n] = (sqc_ir)malloc(sizeof(sqc_info_t));
   mng->c[n]->no = n;
   mng->c[n]->qubits  = qubits;
   mng->c[n]->ngates  = 0;
@@ -145,43 +145,40 @@ sqc_ir* sqc_Circuit(int qubits)
   return mng->c[n];
 }
 
-int sqc_HGate(sqc_ir* qcir, int qubit_number)
+int sqc_HGate(sqc_ir qcir, int qubit_number)
 {
-  sqc_ir* c = mng->c[0];
-  int n =  c->ngates; 
-   c->gate[n].id      = _HGate;
-   c->gate[n].niarg   = 1; 
-   c->gate[n].iarg[0] = qubit_number;
-   c->gate[n].nrarg   = 0; 
-   c->ngates++;
-   return 0;
+  int n =  qcir->ngates; 
+  qcir->gate[n].id      = _HGate;
+  qcir->gate[n].niarg   = 1; 
+  qcir->gate[n].iarg[0] = qubit_number;
+  qcir->gate[n].nrarg   = 0; 
+  qcir->ngates++;
+  return 0;
 }
 
-int sqc_CXGate(sqc_ir* qcir, int qubit_number1, int qubit_number2)
+int sqc_CXGate(sqc_ir qcir, int qubit_number1, int qubit_number2)
 {
-  sqc_ir* c = mng->c[0];
-  int n = c->ngates; 
-  c->gate[n].id      = _CXGate;
-  c->gate[n].niarg   = 2; 
-  c->gate[n].iarg[0] = qubit_number1;
-  c->gate[n].iarg[1] = qubit_number2;
-  c->gate[n].nrarg   = 0; 
-  c->ngates++;
+  int n = qcir->ngates; 
+  qcir->gate[n].id      = _CXGate;
+  qcir->gate[n].niarg   = 2; 
+  qcir->gate[n].iarg[0] = qubit_number1;
+  qcir->gate[n].iarg[1] = qubit_number2;
+  qcir->gate[n].nrarg   = 0; 
+  qcir->ngates++;
 }
 
-int sqc_Measure(sqc_ir* qcir, int qubit_number, int clbit_number)
+int sqc_Measure(sqc_ir qcir, int qubit_number, int clbit_number)
 {
-  sqc_ir* c = mng->c[0];
-  int n = c->ngates; 
-  c->gate[n].id      = _Measure;
-  c->gate[n].niarg   = 2; 
-  c->gate[n].iarg[0] = qubit_number;
-  c->gate[n].iarg[1] = clbit_number;
-  c->gate[n].nrarg   = 0; 
-  c->ngates++;
+  int n =qcir->ngates; 
+  qcir->gate[n].id      = _Measure;
+  qcir->gate[n].niarg   = 2; 
+  qcir->gate[n].iarg[0] = qubit_number;
+  qcir->gate[n].iarg[1] = clbit_number;
+  qcir->gate[n].nrarg   = 0; 
+  qcir->ngates++;
 }
 
-int sqc_Dump(sqc_ir* qcir, char* buf, unsigned int size)
+int sqc_Dump(sqc_ir qcir, char* buf, unsigned int size)
 {
   char* tmpbuf = (char *)malloc((qcir->ngates)*64+50);
   sqc_ir_to_qasm(qcir, tmpbuf);
@@ -191,11 +188,12 @@ int sqc_Dump(sqc_ir* qcir, char* buf, unsigned int size)
     return -1;
   }
   memcpy(buf, tmpbuf, tmpbuflen);
+  *(buf+tmpbuflen)='\0';
   free(tmpbuf);
   return (int)tmpbuflen;
 }
 
-int sqc_Transpile(sqc_ir* qcir, char* buf, unsigned int size,
+int sqc_Transpile(sqc_ir qcir, char* buf, unsigned int size,
 		  PROVIDERS provider, int opt_level)
 {
   if( provider >= _NProviders ) {
@@ -256,6 +254,7 @@ int sqc_Transpile(sqc_ir* qcir, char* buf, unsigned int size,
     return -1;
   }
   memcpy(buf, qasm_str_transpiled, len);
+  *(buf+len)='\0';
 
   Py_XDECREF(pyTranspiledStr);
   Py_XDECREF(pyTranspiledCircuit);
@@ -275,9 +274,6 @@ int sqc_Finalize()
   Py_Finalize();
   for(int i=0; i<CIRCUIT_NUM; i++){
     if(mng->c[i] != NULL){
-        if(mng->c[i]->dump_str != NULL){
-            free(mng->c[i]->dump_str);
-        }
         free(mng->c[i]);
     }
   }
@@ -293,7 +289,7 @@ int sqc_Finalize()
  * reference:
  * https://github.com/Qiskit/qiskit/blob/main/qiskit/qasm/libs/stdgates.inc
  */
-void sqc_ir_to_qasm(sqc_ir* info, char *s)
+void sqc_ir_to_qasm(sqc_ir info, char *s)
 {
   char       t[256];
   gate_info *g;
