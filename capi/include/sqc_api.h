@@ -148,12 +148,12 @@ sqc_ir sqc_Circuit(int qubits)
 int sqc_HGate(sqc_ir qcir, int qubit_number)
 {
   int n =  qcir->ngates; 
-   qcir->gate[n].id      = _HGate;
-   qcir->gate[n].niarg   = 1; 
-   qcir->gate[n].iarg[0] = qubit_number;
-   qcir->gate[n].nrarg   = 0; 
-   qcir->ngates++;
-   return 0;
+  qcir->gate[n].id      = _HGate;
+  qcir->gate[n].niarg   = 1; 
+  qcir->gate[n].iarg[0] = qubit_number;
+  qcir->gate[n].nrarg   = 0; 
+  qcir->ngates++;
+  return 0;
 }
 
 int sqc_CXGate(sqc_ir qcir, int qubit_number1, int qubit_number2)
