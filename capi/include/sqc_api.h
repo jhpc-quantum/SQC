@@ -61,6 +61,7 @@ int sqc_CXGate(sqc_ir qcir, int qubit_number1, int qubit_number2);
 int sqc_CZGate(sqc_ir qcir, int qubit_number1, int qubit_number2);
 int sqc_RZGate(sqc_ir qcir, double phi, int qubit_number);
 int sqc_SGate(sqc_ir qcir, int qubit_number);
+int sqc_SdgGate(sqc_ir qcir, int qubit_number);
 int sqc_Measure(sqc_ir qcir, int qubit_number, int clbit_number);
 int sqc_Dump(sqc_ir qcir, char* buf, unsigned int size);
 int sqc_Transpile(sqc_ir qcir, char* buf, unsigned int size,
@@ -77,6 +78,7 @@ enum enum_gates{
   _CZGate,
   _RZGate,
   _SGate,
+  _SdgGate,
   _Measure,
   _NGates // # of gates 
 };
@@ -199,6 +201,17 @@ int sqc_SGate(sqc_ir qcir, int qubit_number)
 {
   int n =  qcir->ngates; 
   qcir->gate[n].id      = _SGate;
+  qcir->gate[n].niarg   = 1; 
+  qcir->gate[n].iarg[0] = qubit_number;
+  qcir->gate[n].nrarg   = 0; 
+  qcir->ngates++;
+  return 0;
+}
+
+int sqc_SdgGate(sqc_ir qcir, int qubit_number)
+{
+  int n =  qcir->ngates; 
+  qcir->gate[n].id      = _SdgGate;
   qcir->gate[n].niarg   = 1; 
   qcir->gate[n].iarg[0] = qubit_number;
   qcir->gate[n].nrarg   = 0; 
@@ -353,7 +366,10 @@ void sqc_ir_to_qasm(sqc_ir info, char *s)
         break;
       case _SGate:
         sprintf(t, "s q[%d];\n", g->iarg[0]);
-        break;       
+        break;
+      case _SdgGate:
+        sprintf(t, "sdg q[%d];\n", g->iarg[0]);
+        break;        
       case _Measure:
         sprintf(t, "c[%d] = measure q[%d];\n",g->iarg[1], g->iarg[0]);
         break;
