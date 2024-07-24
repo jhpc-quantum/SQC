@@ -290,9 +290,6 @@ int sqc_Dump(sqc_ir qcir, char* buf, unsigned int size)
 /// \retval 正の値 正常終了。bufに格納したバイト数を返す。
 /// \retval 負の値 異常終了
 ///
-/// \TODO opt_levelをqiskit.compiler.transpileに方法が不明であるため、
-///       引数で指定されたopt_levelは有効となっていない。
-///       （デフォルトの1で処理されていると思われる）
 /// \TODO 現時点では、transpileに指定可能なproviderは、provider_infoで定義されているもののみ。
 ///       現在の設計はproviderのオブジェクトの生成に引数が不要な場合しか想定していないため、
 ///       providerのオブジェクトの生成に引数が必要なものに対応する場合はI/Fの検討が必要。
