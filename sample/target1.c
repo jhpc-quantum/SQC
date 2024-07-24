@@ -16,6 +16,7 @@ int main(int argc, char *argv[])
   sqc_CXGate(qcir, 0, 1);
   sqc_CZGate(qcir, 0, 1);
   sqc_RZGate(qcir, 1, 0);
+  sqc_SGate(qcir, 0);
   sqc_Measure(qcir, 0, 0);
   sqc_Measure(qcir, 1, 1);
 
