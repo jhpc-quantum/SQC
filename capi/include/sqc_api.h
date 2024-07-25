@@ -290,9 +290,6 @@ int sqc_Dump(sqc_ir qcir, char* buf, unsigned int size)
 /// \retval 正の値 正常終了。bufに格納したバイト数を返す。
 /// \retval 負の値 異常終了
 ///
-/// \TODO opt_levelをqiskit.compiler.transpileに方法が不明であるため、
-///       引数で指定されたopt_levelは有効となっていない。
-///       （デフォルトの1で処理されていると思われる）
 /// \TODO 現時点では、transpileに指定可能なproviderは、provider_infoで定義されているもののみ。
 ///       現在の設計はproviderのオブジェクトの生成に引数が不要な場合しか想定していないため、
 ///       providerのオブジェクトの生成に引数が必要なものに対応する場合はI/Fの検討が必要。
@@ -304,9 +301,10 @@ int sqc_Transpile(sqc_ir qcir, char* buf, unsigned int size,
   }
 
   /// \TODO デバッグ情報の出力に関しては要検討（ここに限らず）
-  printf("[ DEBUG ] The provider to use for transpilation : %s From %s\n",
+  printf("[ DEBUG ] The provider to use for transpilation : %s From %s  (opt_level=%d)\n",         
 	 provider_info[provider][1],
-	 provider_info[provider][0]);
+	 provider_info[provider][0],
+         opt_level);
 
   // QASM-string from sqc_ir
   char* qasm_str = (char *)malloc((qcir->ngates)*64+50);
@@ -334,11 +332,16 @@ int sqc_Transpile(sqc_ir qcir, char* buf, unsigned int size,
   free(qasm_str);
 
   // execute Transpile
-  //   TODO: Reflection of optimize_level
-  PyObject* pyArgs = PyTuple_New(2);
+  //   Use tuples and dicts as arguments to call qiskit.compiler.transpile
+  PyObject* pyArgs = PyTuple_New(1);
   PyTuple_SetItem(pyArgs, 0, pyCircuit);
-  PyTuple_SetItem(pyArgs, 1, pyProvider);
-  PyObject* pyTranspiledCircuit = PyObject_CallObject(mng->pyTranspiler, pyArgs);
+
+  PyObject* pyDictArg = PyDict_New();
+  PyDict_SetItemString( pyDictArg, "backend", pyProvider);
+  PyObject* pyOptLevel= PyLong_FromLong(opt_level);
+  PyDict_SetItemString( pyDictArg, "optimization_level", pyOptLevel);
+
+  PyObject* pyTranspiledCircuit = PyObject_Call(mng->pyTranspiler, pyArgs, pyDictArg);
   PyErr_Print();
   
   // generate transpiled-QASM-string from Transpiled Circuit
@@ -365,6 +368,8 @@ int sqc_Transpile(sqc_ir qcir, char* buf, unsigned int size,
   Py_XDECREF(pyTranspiledStr);
   Py_XDECREF(pyTranspiledCircuit);
   Py_XDECREF(pyArgs);
+  Py_XDECREF(pyDictArg);
+  Py_XDECREF(pyOptLevel);
   Py_XDECREF(pyCircuit);
   Py_XDECREF(pyTargetQASM);
   Py_XDECREF(pyProvider);
