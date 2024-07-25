@@ -60,6 +60,7 @@ int sqc_HGate(sqc_ir qcir, int qubit_number);
 int sqc_CXGate(sqc_ir qcir, int qubit_number1, int qubit_number2);
 int sqc_CZGate(sqc_ir qcir, int qubit_number1, int qubit_number2);
 int sqc_RXGate(sqc_ir qcir, double theta, int qubit_number);
+int sqc_RYGate(sqc_ir qcir, double theta, int qubit_number);
 int sqc_RZGate(sqc_ir qcir, double phi, int qubit_number);
 int sqc_SGate(sqc_ir qcir, int qubit_number);
 int sqc_SdgGate(sqc_ir qcir, int qubit_number);
@@ -78,6 +79,7 @@ enum enum_gates{
   _CXGate, 
   _CZGate,
   _RXGate,
+  _RYGate,
   _RZGate,
   _SGate,
   _SdgGate,
@@ -192,6 +194,17 @@ int sqc_RXGate(sqc_ir qcir, double theta, int qubit_number)
 {
   int n = qcir->ngates;
   qcir->gate[n].id      = _RXGate;
+  qcir->gate[n].niarg   = 1; 
+  qcir->gate[n].iarg[0] = qubit_number;
+  qcir->gate[n].nrarg   = 1; 
+  qcir->gate[n].rarg[0] = theta;
+  qcir->ngates++;
+}
+
+int sqc_RYGate(sqc_ir qcir, double theta, int qubit_number)
+{
+  int n = qcir->ngates;
+  qcir->gate[n].id      = _RYGate;
   qcir->gate[n].niarg   = 1; 
   qcir->gate[n].iarg[0] = qubit_number;
   qcir->gate[n].nrarg   = 1; 
@@ -376,6 +389,9 @@ void sqc_ir_to_qasm(sqc_ir info, char *s)
         break;
       case _RXGate:
         sprintf(t, "rx(%.30f) q[%d];\n",g->rarg[0], g->iarg[0]);
+        break;
+      case _RYGate:
+        sprintf(t, "ry(%.30f) q[%d];\n",g->rarg[0], g->iarg[0]);
         break;
       case _RZGate:
         sprintf(t, "rz(%.30f) q[%d];\n",g->rarg[0], g->iarg[0]);
