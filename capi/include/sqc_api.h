@@ -36,9 +36,11 @@ char* provider_info[_NProviders][2] = {
   //{ "qiskit.providers.fake_provider", "GenericBackendV2" }
 };
 
-
+/// \brief 量子回路のIRに保存できるゲート情報の数
 #define MAX_N_GATES 128 
+/// \brief ゲートの整数パラメータの最大数
 #define MAX_I_ARGS  8
+/// \brief ゲートの実数パラメータの最大数
 #define MAX_R_ARGS  8
 
 /// \brief ゲートなどの操作を表現する構造体
@@ -49,9 +51,9 @@ char* provider_info[_NProviders][2] = {
 typedef struct{
   int    id;               ///< この操作の種別（enum_gates）。_HGateなど。
   int    niarg;            ///< この操作の整数パラメータの数
-  int    nrarg;            ///< この操作の浮動小数点数パラメータの数
+  int    nrarg;            ///< この操作の実数パラメータの数
   int    iarg[MAX_I_ARGS]; ///< この操作の整数パラメータ
-  double rarg[MAX_R_ARGS]; ///< この操作の浮動小数点数パラメータ
+  double rarg[MAX_R_ARGS]; ///< この操作の実数パラメータ
 } gate_info;
 
 /// \brief 量子回路のIRを表現する構造体
@@ -91,15 +93,15 @@ enum enum_gates{
 };
 
 
-
+/// \brief 量子回路のIRの最大数
 #define CIRCUIT_NUM 10
 /// \brief C-API処理で使用する情報管理領域
 typedef struct{
   sqc_ir c[CIRCUIT_NUM];  ///< 量子回路IR
   int nsqc_irs;           ///< 使用している量子回路IR数
-  PyObject* pyLoads;      ///< qiskit.qasm3.loadsの関数オブジェクト
-  PyObject* pyDumps;      ///< qiskit.qasm3.dumpsの関数オブジェクトの保持
-  PyObject* pyTranspiler; ///< qiskit.compiler.transpileの関数オブジェクト
+  PyObject* pyLoads;      ///< OpenQASM文字列をQiskitのcircuitオブジェクトに変換する関数の関数オブジェクト
+  PyObject* pyDumps;      ///< QiskitのcircuitオブジェクトをOpenQASM文字列に変換する関数の関数オブジェクト
+  PyObject* pyTranspiler; ///< Qiskitのトランスパイラを呼び出す関数の関数オブジェクト
 } mng_area;
 
 mng_area* mng;
