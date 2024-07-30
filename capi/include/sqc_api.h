@@ -245,7 +245,16 @@ int sqc_SdgGate(sqc_ir qcir, int qubit_number)
   return 0;
 }
 
-
+/// \brief 量子回路IRに Measureを追加する
+/// \param [in] qcir 量子回路IR
+/// \param [in] qubit_number1 測定する量子ビット番号
+/// \param [in] clbit_number 古典ビット番号
+///
+/// \retval 0 正常終了
+/// \retval それ以外 異常終了
+///
+/// \TODO 存在しないビット番号が指定されたかのチェックは実施していない。
+/// \TODO 操作を追加できない状態（MAX_N_GATES数を超える操作追加）かのチェックは実施していない。
 int sqc_Measure(sqc_ir qcir, int qubit_number, int clbit_number)
 {
   int n =qcir->ngates; 
