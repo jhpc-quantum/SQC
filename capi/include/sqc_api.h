@@ -74,6 +74,12 @@ int sqc_Initialize(void);
 sqc_ir sqc_Circuit(int qubits);
 int sqc_HGate(sqc_ir qcir, int qubit_number);
 int sqc_CXGate(sqc_ir qcir, int qubit_number1, int qubit_number2);
+int sqc_CZGate(sqc_ir qcir, int qubit_number1, int qubit_number2);
+int sqc_RXGate(sqc_ir qcir, double theta, int qubit_number);
+int sqc_RYGate(sqc_ir qcir, double theta, int qubit_number);
+int sqc_RZGate(sqc_ir qcir, double phi, int qubit_number);
+int sqc_SGate(sqc_ir qcir, int qubit_number);
+int sqc_SdgGate(sqc_ir qcir, int qubit_number);
 int sqc_Measure(sqc_ir qcir, int qubit_number, int clbit_number);
 int sqc_Dump(sqc_ir qcir, char* buf, unsigned int size);
 int sqc_Transpile(sqc_ir qcir, char* buf, unsigned int size,
@@ -88,6 +94,12 @@ int sqc_Finalize(void);
 enum enum_gates{
   _HGate,
   _CXGate, 
+  _CZGate,
+  _RXGate,
+  _RYGate,
+  _RZGate,
+  _SGate,
+  _SdgGate,
   _Measure,
   _NGates // # of gates 
 };
@@ -232,6 +244,72 @@ int sqc_CXGate(sqc_ir qcir, int qubit_number1, int qubit_number2)
   qcir->gate[n].iarg[1] = qubit_number2;
   qcir->gate[n].nrarg   = 0; 
   qcir->ngates++;
+}
+
+int sqc_CZGate(sqc_ir qcir, int qubit_number1, int qubit_number2)
+{
+  int n = qcir->ngates;
+  qcir->gate[n].id      = _CZGate;
+  qcir->gate[n].niarg   = 2; 
+  qcir->gate[n].iarg[0] = qubit_number1;
+  qcir->gate[n].iarg[1] = qubit_number2;
+  qcir->gate[n].nrarg   = 0; 
+  qcir->ngates++;
+}
+
+int sqc_RXGate(sqc_ir qcir, double theta, int qubit_number)
+{
+  int n = qcir->ngates;
+  qcir->gate[n].id      = _RXGate;
+  qcir->gate[n].niarg   = 1; 
+  qcir->gate[n].iarg[0] = qubit_number;
+  qcir->gate[n].nrarg   = 1; 
+  qcir->gate[n].rarg[0] = theta;
+  qcir->ngates++;
+}
+
+int sqc_RYGate(sqc_ir qcir, double theta, int qubit_number)
+{
+  int n = qcir->ngates;
+  qcir->gate[n].id      = _RYGate;
+  qcir->gate[n].niarg   = 1; 
+  qcir->gate[n].iarg[0] = qubit_number;
+  qcir->gate[n].nrarg   = 1; 
+  qcir->gate[n].rarg[0] = theta;
+  qcir->ngates++;
+}
+
+int sqc_RZGate(sqc_ir qcir, double phi, int qubit_number)
+{
+  int n = qcir->ngates;
+  qcir->gate[n].id      = _RZGate;
+  qcir->gate[n].niarg   = 1; 
+  qcir->gate[n].iarg[0] = qubit_number;
+  qcir->gate[n].nrarg   = 1; 
+  qcir->gate[n].rarg[0] = phi;
+  qcir->ngates++;
+}
+
+int sqc_SGate(sqc_ir qcir, int qubit_number)
+{
+  int n =  qcir->ngates; 
+  qcir->gate[n].id      = _SGate;
+  qcir->gate[n].niarg   = 1; 
+  qcir->gate[n].iarg[0] = qubit_number;
+  qcir->gate[n].nrarg   = 0; 
+  qcir->ngates++;
+  return 0;
+}
+
+int sqc_SdgGate(sqc_ir qcir, int qubit_number)
+{
+  int n =  qcir->ngates; 
+  qcir->gate[n].id      = _SdgGate;
+  qcir->gate[n].niarg   = 1; 
+  qcir->gate[n].iarg[0] = qubit_number;
+  qcir->gate[n].nrarg   = 0; 
+  qcir->ngates++;
+  return 0;
 }
 
 /// \brief 量子回路IRに Measureを追加する
@@ -394,7 +472,7 @@ int sqc_Transpile(sqc_ir qcir, char* buf, unsigned int size,
 ///
 /// \note sqc_Initializeと同様に、プロセス内で１回しか呼び出せない。
 ///       プロセス内で複数回のPy_Finalizeを呼び出した場合、どういった状態となるかは未調査。
-int sqc_Finalize()
+int sqc_Finalize(void)
 {
   Py_XDECREF(mng->pyLoads);
   Py_XDECREF(mng->pyDumps);
@@ -444,6 +522,24 @@ void sqc_ir_to_qasm(sqc_ir info, char *s)
       case _CXGate:
         sprintf(t, "cx q[%d], q[%d];\n",g->iarg[0], g->iarg[1]);
         break; 
+      case _CZGate:
+        sprintf(t, "cz q[%d], q[%d];\n",g->iarg[0], g->iarg[1]);
+        break;
+      case _RXGate:
+        sprintf(t, "rx(%.20f) q[%d];\n",g->rarg[0], g->iarg[0]);
+        break;
+      case _RYGate:
+        sprintf(t, "ry(%.20f) q[%d];\n",g->rarg[0], g->iarg[0]);
+        break;
+      case _RZGate:
+        sprintf(t, "rz(%.20f) q[%d];\n",g->rarg[0], g->iarg[0]);
+        break;
+      case _SGate:
+        sprintf(t, "s q[%d];\n", g->iarg[0]);
+        break;
+      case _SdgGate:
+        sprintf(t, "sdg q[%d];\n", g->iarg[0]);
+        break;        
       case _Measure:
         sprintf(t, "c[%d] = measure q[%d];\n",g->iarg[1], g->iarg[0]);
         break;
