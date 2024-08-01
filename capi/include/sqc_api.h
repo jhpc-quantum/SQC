@@ -524,13 +524,13 @@ void sqc_ir_to_qasm(sqc_ir info, char *s)
         sprintf(t, "cz q[%d], q[%d];\n",g->iarg[0], g->iarg[1]);
         break;
       case _RXGate:
-        sprintf(t, "rx(%.30f) q[%d];\n",g->rarg[0], g->iarg[0]);
+        sprintf(t, "rx(%.20f) q[%d];\n",g->rarg[0], g->iarg[0]);
         break;
       case _RYGate:
-        sprintf(t, "ry(%.30f) q[%d];\n",g->rarg[0], g->iarg[0]);
+        sprintf(t, "ry(%.20f) q[%d];\n",g->rarg[0], g->iarg[0]);
         break;
       case _RZGate:
-        sprintf(t, "rz(%.30f) q[%d];\n",g->rarg[0], g->iarg[0]);
+        sprintf(t, "rz(%.20f) q[%d];\n",g->rarg[0], g->iarg[0]);
         break;
       case _SGate:
         sprintf(t, "s q[%d];\n", g->iarg[0]);
