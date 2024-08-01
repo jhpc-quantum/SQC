@@ -470,7 +470,7 @@ int sqc_Transpile(sqc_ir qcir, char* buf, unsigned int size,
 ///
 /// \note sqc_Initializeと同様に、プロセス内で１回しか呼び出せない。
 ///       プロセス内で複数回のPy_Finalizeを呼び出した場合、どういった状態となるかは未調査。
-int sqc_Finalize()
+int sqc_Finalize(void)
 {
   Py_XDECREF(mng->pyLoads);
   Py_XDECREF(mng->pyDumps);
