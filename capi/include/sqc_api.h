@@ -1,7 +1,8 @@
+#define PY_SSIZE_T_CLEAN
+#include <Python.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <Python.h>
 
 /// \brief sqc_Transpileにてproviderを指定するenum
 /// \note GenericBackendV2はオブジェクトの生成に引数(qubit数)が必要であるため、
