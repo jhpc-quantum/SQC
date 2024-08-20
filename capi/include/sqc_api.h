@@ -181,20 +181,14 @@ int sqc_Initialize(void)
 /// \brief 量子回路IR領域の取得
 /// \details 量子回路IR領域を取得し、返却する。操作の追加などのAPIは、本APIが返却した値を用いる。
 ///          qubit数と古典ビット数は同数であると想定する。
+///          CIRCUIT_NUM個の量子回路IRを保持できる。
 /// \param [in] qubits 量子回路のqubit数
 ///
 /// \retval NULL 異常終了
 /// \retval それ以外 量子回路IRのポインタ（sqc_ir）
-///
-/// \note データ構造的にはCIRCUIT_NUM個の量子回路IRを保持できるが、
-///       現在はsqc_Circuitが複数回呼ばれた場合はエラーとしている。
 sqc_ir sqc_Circuit(int qubits)
 {
   int n = mng->nsqc_irs;
-  if( n!=0 ) {
-    printf("Multiple IR generation is not supported.\n");
-    return NULL;
-  }
   
   mng->c[n] = (sqc_ir)malloc(sizeof(sqc_info_t));
   mng->c[n]->no = n;
