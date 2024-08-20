@@ -4,13 +4,15 @@
 int main(int argc, char *argv[])
 {
   const int qubits = 2;
+  const int clbits = 2;
   sqc_ir qcir;
   PROVIDERS provider = Fake20QV1;
   const int opt_level = 1;
 
   sqc_Initialize(); 
 
-  qcir = sqc_Circuit(qubits); /* 古典ビット数はqubitsと同数 */
+  qcir = sqc_Circuit(qubits); 
+  sqc_ClbitRegister(qcir, clbits);
 
   sqc_HGate(qcir, 0);
   sqc_CXGate(qcir, 0, 1);
