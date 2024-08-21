@@ -239,8 +239,19 @@ int sqc_CXGate(sqc_ir qcir, int qubit_number1, int qubit_number2)
   qcir->gate[n].iarg[1] = qubit_number2;
   qcir->gate[n].nrarg   = 0; 
   qcir->ngates++;
+  return 0;
 }
 
+/// \brief 量子回路IRに cz gateを追加する
+/// \param [in] qcir 量子回路IR
+/// \param [in] qubit_number1 制御ビット番号
+/// \param [in] qubit_number2 標的ビット番号
+///
+/// \retval 0 正常終了
+/// \retval それ以外 異常終了
+///
+/// \TODO 存在しないビット番号が指定されたかのチェックは実施していない。
+/// \TODO 操作を追加できない状態（MAX_N_GATES数を超える操作追加）かのチェックは実施していない。
 int sqc_CZGate(sqc_ir qcir, int qubit_number1, int qubit_number2)
 {
   int n = qcir->ngates;
@@ -250,8 +261,19 @@ int sqc_CZGate(sqc_ir qcir, int qubit_number1, int qubit_number2)
   qcir->gate[n].iarg[1] = qubit_number2;
   qcir->gate[n].nrarg   = 0; 
   qcir->ngates++;
+  return 0;
 }
 
+/// \brief 量子回路IRに rx gateを追加する
+/// \param [in] qcir 量子回路IR
+/// \param [in] theta 回転角
+/// \param [in] qubit_number 標的ビット番号
+///
+/// \retval 0 正常終了
+/// \retval それ以外 異常終了
+///
+/// \TODO 存在しないビット番号が指定されたかのチェックは実施していない。
+/// \TODO 操作を追加できない状態（MAX_N_GATES数を超える操作追加）かのチェックは実施していない。
 int sqc_RXGate(sqc_ir qcir, double theta, int qubit_number)
 {
   int n = qcir->ngates;
@@ -261,8 +283,19 @@ int sqc_RXGate(sqc_ir qcir, double theta, int qubit_number)
   qcir->gate[n].nrarg   = 1; 
   qcir->gate[n].rarg[0] = theta;
   qcir->ngates++;
+  return 0;
 }
 
+/// \brief 量子回路IRに ry gateを追加する
+/// \param [in] qcir 量子回路IR
+/// \param [in] theta 回転角
+/// \param [in] qubit_number 標的ビット番号
+///
+/// \retval 0 正常終了
+/// \retval それ以外 異常終了
+///
+/// \TODO 存在しないビット番号が指定されたかのチェックは実施していない。
+/// \TODO 操作を追加できない状態（MAX_N_GATES数を超える操作追加）かのチェックは実施していない。
 int sqc_RYGate(sqc_ir qcir, double theta, int qubit_number)
 {
   int n = qcir->ngates;
@@ -272,8 +305,19 @@ int sqc_RYGate(sqc_ir qcir, double theta, int qubit_number)
   qcir->gate[n].nrarg   = 1; 
   qcir->gate[n].rarg[0] = theta;
   qcir->ngates++;
+  return 0;
 }
 
+/// \brief 量子回路IRに rz gateを追加する
+/// \param [in] qcir 量子回路IR
+/// \param [in] phi 回転角
+/// \param [in] qubit_number 標的ビット番号
+///
+/// \retval 0 正常終了
+/// \retval それ以外 異常終了
+///
+/// \TODO 存在しないビット番号が指定されたかのチェックは実施していない。
+/// \TODO 操作を追加できない状態（MAX_N_GATES数を超える操作追加）かのチェックは実施していない。
 int sqc_RZGate(sqc_ir qcir, double phi, int qubit_number)
 {
   int n = qcir->ngates;
@@ -283,8 +327,18 @@ int sqc_RZGate(sqc_ir qcir, double phi, int qubit_number)
   qcir->gate[n].nrarg   = 1; 
   qcir->gate[n].rarg[0] = phi;
   qcir->ngates++;
+  return 0;
 }
 
+/// \brief 量子回路IRに s gateを追加する
+/// \param [in] qcir 量子回路IR
+/// \param [in] qubit_number 標的ビット番号
+///
+/// \retval 0 正常終了
+/// \retval それ以外 異常終了
+///
+/// \TODO 存在しないビット番号が指定されたかのチェックは実施していない。
+/// \TODO 操作を追加できない状態（MAX_N_GATES数を超える操作追加）かのチェックは実施していない。
 int sqc_SGate(sqc_ir qcir, int qubit_number)
 {
   int n =  qcir->ngates; 
@@ -296,6 +350,15 @@ int sqc_SGate(sqc_ir qcir, int qubit_number)
   return 0;
 }
 
+/// \brief 量子回路IRに sdg gateを追加する
+/// \param [in] qcir 量子回路IR
+/// \param [in] qubit_number 標的ビット番号
+///
+/// \retval 0 正常終了
+/// \retval それ以外 異常終了
+///
+/// \TODO 存在しないビット番号が指定されたかのチェックは実施していない。
+/// \TODO 操作を追加できない状態（MAX_N_GATES数を超える操作追加）かのチェックは実施していない。
 int sqc_SdgGate(sqc_ir qcir, int qubit_number)
 {
   int n =  qcir->ngates; 
@@ -309,7 +372,7 @@ int sqc_SdgGate(sqc_ir qcir, int qubit_number)
 
 /// \brief 量子回路IRに Measureを追加する
 /// \param [in] qcir 量子回路IR
-/// \param [in] qubit_number1 測定する量子ビット番号
+/// \param [in] qubit_number 測定する量子ビット番号
 /// \param [in] clbit_number 古典ビット番号
 ///
 /// \retval 0 正常終了
@@ -326,6 +389,7 @@ int sqc_Measure(sqc_ir qcir, int qubit_number, int clbit_number)
   qcir->gate[n].iarg[1] = clbit_number;
   qcir->gate[n].nrarg   = 0; 
   qcir->ngates++;
+  return 0;
 }
 
 /// \brief 量子回路IRからOpenQASM文字列を生成する
