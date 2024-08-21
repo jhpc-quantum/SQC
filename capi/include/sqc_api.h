@@ -119,7 +119,7 @@ typedef struct{
 
 mng_area* mng;
 
-void sqc_ir_to_qasm(sqc_ir info, char *s);
+char* sqc_ir_to_qasm(sqc_ir info);
 
 /// \brief C-APIの利用開始を宣言する
 ///
@@ -337,12 +337,7 @@ int sqc_Measure(sqc_ir qcir, int qubit_number, int clbit_number)
 /// \retval 負の値 異常終了
 int sqc_Dump(sqc_ir qcir, char* buf, unsigned int size)
 {
-  // 生成するQASM文字列用の領域を取得する
-  // 取得するサイズは厳密でなく、mallocで指定する即値は以下のためのものである。
-  //    50：定型で出力するinclude, qubit, cbitなどのためのbyte数
-  //    64：１つのの操作に対するbyte数。量子回路IR数×64byteを確保
-  char* tmpbuf = (char *)malloc((qcir->ngates)*64+50);
-  sqc_ir_to_qasm(qcir, tmpbuf);
+  char* tmpbuf = sqc_ir_to_qasm(qcir);
   size_t tmpbuflen = strlen(tmpbuf)+1;
   if (size < tmpbuflen) {
     // ユーザから渡されたバッファ長が短い場合はエラー復帰
@@ -382,8 +377,7 @@ int sqc_Transpile(sqc_ir qcir, char* buf, unsigned int size,
          opt_level);
 
   // QASM-string from sqc_ir
-  char* qasm_str = (char *)malloc((qcir->ngates)*64+50);
-  sqc_ir_to_qasm(qcir, qasm_str);
+  char* qasm_str = sqc_ir_to_qasm(qcir);
 
   // generate provider
   PyObject* pyImportName;
@@ -487,11 +481,12 @@ int sqc_Finalize(void)
 /// \details  量子回路IRからOpenQASM文字列を生成する際に使用する内部関数。
 ///           C-APIのI/Fとして公開されない。
 ///           量子回路IRのgate[n]を順に辿り、各操作に対応する文字列を連結する。
+///           この関数の出力であるOpenQASM文字列は動的メモリで管理しており、
+///           free関数で解放しなければならない。
 ///
 /// \param [in] info 量子回路IR
-/// \param [in,out] s OpenQASM文字列を格納するバッファ。十分な大きさがある想定
 ///
-/// \return なし
+/// \return OpenQASM文字列のポインタ
 ///
 /// \note ほぼRCCSから提供されたままの仕組である。提供時以下のようにコメントされていた。
 /// ```
@@ -501,10 +496,16 @@ int sqc_Finalize(void)
 ///  * reference:
 ///  * https://github.com/Qiskit/qiskit/blob/main/qiskit/qasm/libs/stdgates.inc
 /// ```
-void sqc_ir_to_qasm(sqc_ir info, char *s)
+char* sqc_ir_to_qasm(sqc_ir info)
 {
   char       t[256];
   gate_info *g;
+
+  // 生成するQASM文字列用の領域を取得する
+  // 取得するサイズは厳密でなく、mallocで指定する即値は以下のためのものである。
+  //    50：定型で出力するinclude, qubit, cbitなどのためのbyte数
+  //    64：１つのの操作に対するbyte数。量子回路IR数×64byteを確保
+  char* s = (char *)malloc((info->ngates)*64+50);
 
   sprintf(s, "OPENQASM 3.0;\ninclude \"stdgates.inc\";\nqubit[%d] q;\nbit[%d] c;\n",info->qubits,info->qubits);
   for(int i=0; i<info->ngates; i++){
@@ -544,4 +545,5 @@ void sqc_ir_to_qasm(sqc_ir info, char *s)
     }
     strcat(s, t);
   }
+  return s;
 }
