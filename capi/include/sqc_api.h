@@ -65,7 +65,6 @@ typedef struct{
   // --- common parameters --- 
   int           no;
   int           qubits;
-  int           clbits;
   int            ngates; 
   gate_info      gate[MAX_N_GATES]; 
 } sqc_info_t;
@@ -74,7 +73,6 @@ typedef sqc_info_t* sqc_ir; ///< 量子回路IRのポインタ型。C-APIのIF�
 
 int sqc_Initialize(void);
 sqc_ir sqc_Circuit(int qubits);
-int sqc_ClbitRegister(sqc_ir qcir, int clbits);
 int sqc_HGate(sqc_ir qcir, int qubit_number);
 int sqc_CXGate(sqc_ir qcir, int qubit_number1, int qubit_number2);
 int sqc_CZGate(sqc_ir qcir, int qubit_number1, int qubit_number2);
@@ -200,18 +198,6 @@ sqc_ir sqc_Circuit(int qubits)
   mng->nsqc_irs++;
   
   return mng->c[n];
-}
-
-/// \brief 量子回路IRの古典ビット数を定義する
-/// \param [in] qcir 量子回路IR
-/// \param [in] clbits 古典ビット数
-///
-/// \retval 0 正常終了
-/// \retval それ以外 異常終了
-int sqc_ClbitRegister(sqc_ir qcir, int clbits)
-{
-  qcir->clbits = clbits;
-  return 0;
 }
 
 /// \brief 量子回路IRに h gateを追加する
@@ -520,7 +506,7 @@ void sqc_ir_to_qasm(sqc_ir info, char *s)
   char       t[256];
   gate_info *g;
 
-  sprintf(s, "OPENQASM 3.0;\ninclude \"stdgates.inc\";\nqubit[%d] q;\nbit[%d] c;\n",info->qubits,info->clbits);
+  sprintf(s, "OPENQASM 3.0;\ninclude \"stdgates.inc\";\nqubit[%d] q;\nbit[%d] c;\n",info->qubits,info->qubits);
   for(int i=0; i<info->ngates; i++){
     g = &(info->gate[i]);
     memset(t, 0, sizeof(char)*256);
