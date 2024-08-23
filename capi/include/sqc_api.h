@@ -107,7 +107,7 @@ enum enum_gates{
 
 
 /// \brief 量子回路のIRの最大数
-#define CIRCUIT_NUM 10
+#define CIRCUIT_NUM 48
 /// \brief C-API処理で使用する情報管理領域
 typedef struct{
   sqc_ir c[CIRCUIT_NUM];  ///< 量子回路IR
