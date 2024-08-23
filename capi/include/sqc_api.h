@@ -5,10 +5,6 @@
 #include <string.h>
 
 /// \brief sqc_Transpileにてproviderを指定するenum
-/// \note GenericBackendV2はオブジェクトの生成に引数(qubit数)が必要であるため、
-///       対応を保留している。
-///       オブジェクトの生成に引数が必要となるようなproviderに対応してく場合は、
-///       sqc_TranspileのI/F含め検討が必要。
 typedef enum {
   BasicSimulator,    ///< BasicSimulator
   FakeOpenPulse2Q,   ///< FakeOpenPulse2Q
@@ -19,11 +15,10 @@ typedef enum {
   Fake7QPulseV1,     ///< Fake7QPulseV1
   Fake27QPulseV1,    ///< Fake27QPulseV1
   Fake127QpulseV1,   ///< Fake127QpulseV1
-  //GenericBackendV2, /* オブジェクトの生成に引数が必要。一旦無視する */
   _NProviders,
 } PROVIDERS;
 
-/// \brief enum PROVIDERSに対応するクラス名とimport元の定義
+/// \brief enum PROVIDERSに対応するimport元とクラス名の定義
 char* provider_info[_NProviders][2] = {
   { "qiskit.providers.basic_provider", "BasicSimulator" },
   { "qiskit.providers.fake_provider", "FakeOpenPulse2Q" },
@@ -34,7 +29,6 @@ char* provider_info[_NProviders][2] = {
   { "qiskit.providers.fake_provider", "Fake7QPulseV1" },
   { "qiskit.providers.fake_provider", "Fake27QPulseV1" },
   { "qiskit.providers.fake_provider", "Fake127QPulseV1" }
-  //{ "qiskit.providers.fake_provider", "GenericBackendV2" }
 };
 
 /// \brief 量子回路のIRに保存できるゲート情報の数
