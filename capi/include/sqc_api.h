@@ -34,9 +34,9 @@ char* provider_info[_NProviders][2] = {
 /// \brief 量子回路のIRに保存できるゲート情報の数
 #define MAX_N_GATES 128 
 /// \brief ゲートの整数パラメータの最大数
-#define MAX_I_ARGS  8
+#define MAX_I_ARGS  2
 /// \brief ゲートの実数パラメータの最大数
-#define MAX_R_ARGS  8
+#define MAX_R_ARGS  1
 
 /// \brief ゲートなどの操作を表現する構造体
 /// \details 量子回路の１つのゲートなどの操作を表現する構造体。
