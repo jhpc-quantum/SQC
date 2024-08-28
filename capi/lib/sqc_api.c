@@ -23,16 +23,16 @@ static char* provider_info[_NProviders][2] = {
 
 /// \brief 量子回路IRでの操作を表すenum
 enum enum_gates{
-    _HGate,
-    _CXGate,
-    _CZGate,
-    _RXGate,
-    _RYGate,
-    _RZGate,
-    _SGate,
-    _SdgGate,
-    _Measure,
-    _NGates // # of gates
+    HGate,
+    CXGate,
+    CZGate,
+    RXGate,
+    RYGate,
+    RZGate,
+    SGate,
+    SdgGate,
+    Measure,
+    NGates /// Number of gates
 };
 
 /// \brief 量子回路のIRの最大数
