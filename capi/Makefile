@@ -20,11 +20,9 @@ clean:
 
 build: libsqc_api.so
 
-test: test.dynamic
-
 libsqc_api.so: lib/sqc_api.c
 	mkdir -p build
 	$(CC) $(CFLAGS) -shared $< -o ./build/libsqc_api.so $(PYINC) $(PYLIB)
 
-test.dynamic: ../sample/target1.c
-	$(CC) -Wall -I ./include $< -L./build -lsqc_api -o ./build/test.dynamic
+test: ../sample/target1.c
+	$(CC) -Wall -I ./include $< -L./build -lsqc_api -o ./build/test
