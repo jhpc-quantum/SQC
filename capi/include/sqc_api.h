@@ -12,7 +12,7 @@ typedef enum {
   Fake7QPulseV1,     ///< Fake7QPulseV1
   Fake27QPulseV1,    ///< Fake27QPulseV1
   Fake127QpulseV1,   ///< Fake127QpulseV1
-  _NProviders,
+  NProviders,        /// Number of provieders
 } PROVIDERS;
 
 /// \brief 量子回路のIRに保存できるゲート情報の数
