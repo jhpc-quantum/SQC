@@ -25,14 +25,15 @@ def add_headers():
     ]
     return headers
 
-def add_gate(input_content):
+def add_gates(input_content):
     #ボディ部を生成する関数(ゲート変換部分)
     output_lines = []
     for line in input_content:
-        output_lines.append(f"// 一時的にコメントに変換: {line.strip()}\n") 
-    return output_lines
+        output_lines.append(f"// 一時的にコメントに変換: {line.strip()}\n")
+        #qregが複数ある場合のエラー処理を追加
+    return output_lines ,qreg
 
-def add_footer(input_content):
+def add_footers(qreg):
     #フッター部を返す関数
     footer = [
         '\n// フッター部分（未）\n'
@@ -47,8 +48,8 @@ def convert_to_c(input_file, output_file):
 
     # 出力用の行を格納するリスト
     output_lines = add_headers()
-    output_lines.extend(add_gate(input_content))
-    output_lines.extend(add_footer(input_content))
+    output_lines.extend(add_gates(input_content))
+    output_lines.extend(add_footers(input_content))
 
     # 出力ファイルに書き込む
     with open(output_file, 'w') as file:
