@@ -107,7 +107,7 @@ sqcQC* sqcQuantumCircuit(int qubits)
     return mng->c[n];
 }
 
-int sqcHGate(sqcQC* qc_handle, int qubit_number)
+void sqcHGate(sqcQC* qc_handle, int qubit_number)
 {
     int n =  qc_handle->ngates;
     qc_handle->gate[n].id      = HGate;
@@ -115,10 +115,9 @@ int sqcHGate(sqcQC* qc_handle, int qubit_number)
     qc_handle->gate[n].iarg[0] = qubit_number;
     qc_handle->gate[n].nrarg   = 0;
     qc_handle->ngates++;
-    return 0;
 }
 
-int sqcCXGate(sqcQC* qc_handle, int qubit_number1, int qubit_number2)
+void sqcCXGate(sqcQC* qc_handle, int qubit_number1, int qubit_number2)
 {
     int n = qc_handle->ngates;
     qc_handle->gate[n].id      = CXGate;
@@ -127,10 +126,9 @@ int sqcCXGate(sqcQC* qc_handle, int qubit_number1, int qubit_number2)
     qc_handle->gate[n].iarg[1] = qubit_number2;
     qc_handle->gate[n].nrarg   = 0;
     qc_handle->ngates++;
-    return 0;
 }
 
-int sqcCZGate(sqcQC* qc_handle, int qubit_number1, int qubit_number2)
+void sqcCZGate(sqcQC* qc_handle, int qubit_number1, int qubit_number2)
 {
     int n = qc_handle->ngates;
     qc_handle->gate[n].id      = CZGate;
@@ -139,10 +137,9 @@ int sqcCZGate(sqcQC* qc_handle, int qubit_number1, int qubit_number2)
     qc_handle->gate[n].iarg[1] = qubit_number2;
     qc_handle->gate[n].nrarg   = 0;
     qc_handle->ngates++;
-    return 0;
 }
 
-int sqcRXGate(sqcQC* qc_handle, double theta, int qubit_number)
+void sqcRXGate(sqcQC* qc_handle, double theta, int qubit_number)
 {
     int n = qc_handle->ngates;
     qc_handle->gate[n].id      = RXGate;
@@ -151,10 +148,9 @@ int sqcRXGate(sqcQC* qc_handle, double theta, int qubit_number)
     qc_handle->gate[n].nrarg   = 1;
     qc_handle->gate[n].rarg[0] = theta;
     qc_handle->ngates++;
-    return 0;
 }
 
-int sqcRYGate(sqcQC* qc_handle, double theta, int qubit_number)
+void sqcRYGate(sqcQC* qc_handle, double theta, int qubit_number)
 {
     int n = qc_handle->ngates;
     qc_handle->gate[n].id      = RYGate;
@@ -163,10 +159,9 @@ int sqcRYGate(sqcQC* qc_handle, double theta, int qubit_number)
     qc_handle->gate[n].nrarg   = 1;
     qc_handle->gate[n].rarg[0] = theta;
     qc_handle->ngates++;
-    return 0;
 }
 
-int sqcRZGate(sqcQC* qc_handle, double phi, int qubit_number)
+void sqcRZGate(sqcQC* qc_handle, double phi, int qubit_number)
 {
     int n = qc_handle->ngates;
     qc_handle->gate[n].id      = RZGate;
@@ -175,10 +170,9 @@ int sqcRZGate(sqcQC* qc_handle, double phi, int qubit_number)
     qc_handle->gate[n].nrarg   = 1;
     qc_handle->gate[n].rarg[0] = phi;
     qc_handle->ngates++;
-    return 0;
 }
 
-int sqcSGate(sqcQC* qc_handle, int qubit_number)
+void sqcSGate(sqcQC* qc_handle, int qubit_number)
 {
     int n =  qc_handle->ngates;
     qc_handle->gate[n].id      = SGate;
@@ -186,10 +180,9 @@ int sqcSGate(sqcQC* qc_handle, int qubit_number)
     qc_handle->gate[n].iarg[0] = qubit_number;
     qc_handle->gate[n].nrarg   = 0;
     qc_handle->ngates++;
-    return 0;
 }
 
-int sqcSdgGate(sqcQC* qc_handle, int qubit_number)
+void sqcSdgGate(sqcQC* qc_handle, int qubit_number)
 {
     int n =  qc_handle->ngates;
     qc_handle->gate[n].id      = SdgGate;
@@ -197,10 +190,10 @@ int sqcSdgGate(sqcQC* qc_handle, int qubit_number)
     qc_handle->gate[n].iarg[0] = qubit_number;
     qc_handle->gate[n].nrarg   = 0;
     qc_handle->ngates++;
-    return 0;
 }
 
-int sqcMeasure(sqcQC* qc_handle, int qubit_number, int clbit_number)
+/// \TODO Measureのオプションは実機のプロバイダーを調査して実装する予定
+void sqcMeasure(sqcQC* qc_handle, int qubit_number, int clbit_number, sqcMeasureOptions options)
 {
     int n =qc_handle->ngates;
     qc_handle->gate[n].id      = Measure;
@@ -209,47 +202,77 @@ int sqcMeasure(sqcQC* qc_handle, int qubit_number, int clbit_number)
     qc_handle->gate[n].iarg[1] = clbit_number;
     qc_handle->gate[n].nrarg   = 0;
     qc_handle->ngates++;
-    return 0;
 }
 
-int sqcStoreQCtoMemory(sqcQC* qc_handle, char* buf, unsigned int size)
+int sqcStoreQCtoMemory(sqcQC* qc_handle, void* address, int size, sqcStoreQCOptionKind kind)
 {
+    if(qc_handle->ngates == 0){
+        switch(kind){
+            case storeQCStop:
+                printf("This function is not available because there is no QuantumCircuit.\n"); exit(1);
+                break;
+            case storeQCContinue:
+                break; 
+            case storeQCContinueAndMessage:
+                printf("This function is not available because there is no QuantumCircuit.\n");
+                break;
+            default:
+                printf("This function is not available because there is no QuantumCircuit.\n"); exit(1);
+                break;
+        }
+    }
+    
+    if(size < 0){
+        printf("Negative numbers are not supported.");
+        return -1;
+    }
+    
     char* tmpbuf = gate_info_to_qasm(qc_handle);
     size_t tmpbuflen = strlen(tmpbuf)+1;
-    if (size < tmpbuflen) {
+    if ((size_t)size < tmpbuflen) {
         // ユーザから渡されたバッファ長が短い場合はエラー復帰
         free(tmpbuf);
         return -1;
     }
-    memcpy(buf, tmpbuf, tmpbuflen);
-    *(buf+tmpbuflen)='\0';
+    memcpy(address, tmpbuf, tmpbuflen);
     free(tmpbuf);
     return (int)tmpbuflen;
 }
 
-int sqcTranspile(sqcQC* qc_handle, char* buf, unsigned int size,
-                  sqcTranspileKind provider, sqcTranspileOptions options)
+void sqcTranspile(sqcQC* qc_handle, sqcTranspileKind kind, sqcTranspileOptions options)
 {
-    if( provider >= NProviders ) {
-        printf("!!! unknown provider specified....\n"); exit(1);
+    
+    switch(kind){
+        case BasicSimulator:
+            printf("!!! unknown provider specified....\n"); exit(1);
+            break;
+        case FakeOpenPulse2Q:
+        case FakeOpenPulse3Q:
+        case Fake1Q:
+        case Fake5QV1:
+        case Fake20QV1:
+        case Fake7QPulseV1:
+        case Fake27QPulseV1:
+        case Fake127QpulseV1:
+            sqcFakeProviderOption* FakeOption = (sqcFakeProviderOption*)options;
+            /// \TODO デバッグ情報の出力に関しては要検討（ここに限らず）
+            printf("[ DEBUG ] The provider to use for transpilation : %s From %s  (opt_level=%d)\n", provider_info[kind][1], provider_info[kind][0], FakeOption->optLevel);
+            break;
+        default:
+            printf("!!! unknown provider specified....\n"); exit(1);
+            break;
     }
-
-    /// \TODO デバッグ情報の出力に関しては要検討（ここに限らず）
-    printf("[ DEBUG ] The provider to use for transpilation : %s From %s  (opt_level=%d)\n",
-           provider_info[provider][1],
-           provider_info[provider][0],
-           opt_level);
 
     // QASM-string from sqcQC*
     char* qasm_str = gate_info_to_qasm(qc_handle);
 
     // generate provider
     PyObject* pyImportName;
-    pyImportName = PyUnicode_DecodeFSDefault(provider_info[provider][0]);
+    pyImportName = PyUnicode_DecodeFSDefault(provider_info[kind][0]);
     PyErr_Print();
     PyObject* pyProviderFrom = PyImport_Import(pyImportName);
     PyErr_Print();
-    PyObject* pyProviderClass = PyObject_GetAttrString(pyProviderFrom, provider_info[provider][1]);
+    PyObject* pyProviderClass = PyObject_GetAttrString(pyProviderFrom, provider_info[kind][1]);
     PyErr_Print();
     PyObject* pyProvider = PyObject_CallNoArgs(pyProviderClass);
     PyErr_Print();
@@ -271,7 +294,10 @@ int sqcTranspile(sqcQC* qc_handle, char* buf, unsigned int size,
 
     PyObject* pyDictArg = PyDict_New();
     PyDict_SetItemString( pyDictArg, "backend", pyProvider);
-    PyObject* pyOptLevel= PyLong_FromLong(opt_level);
+
+    //現状はFakeProviderのみサポートしているため、それのオプションのみ指定している。
+    sqcFakeProviderOption* FakeOption = (sqcFakeProviderOption*)options;
+    PyObject* pyOptLevel= PyLong_FromLong(FakeOption->optLevel);
     PyDict_SetItemString( pyDictArg, "optimization_level", pyOptLevel);
 
     PyObject* pyTranspiledCircuit = PyObject_Call(mng->pyTranspiler, pyArgs, pyDictArg);
@@ -281,22 +307,7 @@ int sqcTranspile(sqcQC* qc_handle, char* buf, unsigned int size,
     PyObject* pyTranspiledStr = PyObject_CallOneArg(mng->pyDumps, pyTranspiledCircuit);
     PyErr_Print();
 
-    // Python-string to C-string
-    const char *qasm_str_transpiled;
-    if (pyTranspiledStr != NULL) {
-        qasm_str_transpiled = PyUnicode_AsUTF8(pyTranspiledStr);
-    }
-    else {
-        return -1;
-    }
 
-    size_t len = strlen(qasm_str_transpiled);
-    if (size < len) {
-        // ユーザから渡されたバッファ長が短い場合はエラー復帰
-        return -1;
-    }
-    memcpy(buf, qasm_str_transpiled, len);
-    *(buf+len)='\0';
 
     Py_XDECREF(pyTranspiledStr);
     Py_XDECREF(pyTranspiledCircuit);
@@ -306,8 +317,6 @@ int sqcTranspile(sqcQC* qc_handle, char* buf, unsigned int size,
     Py_XDECREF(pyCircuit);
     Py_XDECREF(pyTargetQASM);
     Py_XDECREF(pyProvider);
-
-    return (int)len;
 }
 
 int sqcFinalize(void)
@@ -330,12 +339,12 @@ int sqcFinalize(void)
 /// \details  量子回路IRからOpenQASM文字列を生成する際に使用する内部関数。
 ///           C-APIのI/Fとして公開されない。
 ///           量子回路IRのgate[n]を順に辿り、各操作に対応する文字列を連結する。
-///           この関数の出力であるOpenQASM文字列は動的メモリで管理しており、
-///           free関数で解放しなければならない。
 ///
 /// \param [in] qc_handle 量子回路IR
 ///
 /// \return OpenQASM文字列のポインタ
+///         この関数の出力であるOpenQASM文字列は動的メモリで管理しており、
+///         呼び出し側で解放しなければならない。
 ///
 /// \note ほぼRCCSから提供されたままの仕組である。提供時以下のようにコメントされていた。
 /// ```

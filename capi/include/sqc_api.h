@@ -208,22 +208,20 @@ void sqcMeasure(sqcQC* qc_handle, int qubit_number, int clbit_number, sqcMeasure
 /// \param [in] qc_handle 量子回路IRのハンドラ
 /// \param [out] address OpenQASM文字列を格納するバッファのポインタ
 /// \param [in] size バッファのサイズ
-/// \param [in] isTranspiledQC トランスパイル前後のどちらの回路を処理するかを判別するための真偽値
 /// \param [in] kind 利用する回路がない場合のエラー出力のオプション
 ///
 /// \retval 正の値 正常終了。bufに格納したバイト数を返す。
 /// \retval 負の値 異常終了
-int sqcStoreQCtoMemory(sqcQC* qc_handle, void* address, int size, bool isTranspiledQC, sqcStoreQCOptionKind kind);
+int sqcStoreQCtoMemory(sqcQC* qc_handle, void* address, int size, sqcStoreQCOptionKind kind);
 
 /// \brief 量子回路IRからOpenQASM文字列を生成しファイルに出力する
 /// \param [in] qc_handle 量子回路IRのハンドラ
 /// \param [out] file 書き込み対象のファイルのハンドラ
-/// \param [in] isTranspiledQC トランスパイル前後のどちらの回路を処理するかを判別するための真偽値
 /// \param [in] kind 利用する回路がない場合のエラー出力のオプション
 ///
 /// \retval 0 正常終了
 /// \retval その他 異常終了
-int sqcStoreQC(sqcQC* qc_handle, FILE* file, bool isTranspiledQC, sqcStoreQCOptionKind kind);
+int sqcStoreQC(sqcQC* qc_handle, FILE* file, sqcStoreQCOptionKind kind);
 
 /// \brief 量子回路IRをTranspileし、その回路情報をPyObject型で出力する
 /// \param [in] qc_handle 量子回路IRのハンドラ
