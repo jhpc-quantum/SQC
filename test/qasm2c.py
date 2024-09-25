@@ -1,8 +1,9 @@
 import sys
 
+# ヘッダー部を返す関数
 
 def add_headers():
-    # ヘッダー部を返す関数
+
     headers = [
         '#include "sqc_api.h"\n'
         '#include <stdio.h>\n'
@@ -26,9 +27,15 @@ def add_headers():
     ]
     return headers
 
+# ボディ部を生成する関数（ゲート変換部分）
+# 変換例：
+# qreg q[4];
+# ↓ 
+# sqcQC* q;
+# q = sqcQuantumCircuit(4);
 
 def add_gates(input_content):
-    # ボディ部を生成する関数（ゲート変換部分）
+
     output_lines = []
     qreg_name = []
     qubit_count = []
@@ -38,8 +45,11 @@ def add_gates(input_content):
 
         # qregの変換処理
         if stripped_line.startswith('qreg'):
-            qreg_name = [qreg.split('[')[0] for qreg in stripped_line.split()[1].split(',')]  # 変数名をリストとして抽出
-            qubit_count = [qreg.split('[')[1].split(']')[0] for qreg in stripped_line.split()[1].split(',')]  # qubit数をリストとして抽出
+            qregs = stripped_line.split()[1].split(',')
+
+            # 変数名と量子ビット数をリストとして抽出
+            qreg_name = [qreg.split('[')[0] for qreg in qregs]  # 変数名をリストとして抽出
+            qubit_count = [qreg.split('[')[1].split(']')[0] for qreg in qregs]  # qubit数をリストとして抽出
 
             if len(qreg_name) > 1:
                 raise ValueError("エラー: qregに複数の要素があります。")
@@ -53,9 +63,10 @@ def add_gates(input_content):
 
     return output_lines, qreg_id  # ボディ変換結果とqregの識別子のリストを返す
 
+# フッター部を返す関数
 
 def add_footers(qreg_id):
-    # フッター部を返す関数
+
     footer = [
             "  FILE * IR_file = NULL;\n",
             '  IR_file = fopen(__FILE__ "_IR.txt", "w");\n',
@@ -73,16 +84,17 @@ def add_footers(qreg_id):
     ]
     return footer
 
+# メイン処理
+# 入力ファイルを読み込む
 
 def convert_to_c(input_file, output_file):
-    # メイン処理
-    # 入力ファイルを読み込む
+
     with open(input_file, 'r') as file:
         input_content = file.readlines()
 
+    body_lines, qreg_id = add_gates(input_content)  # ボディ変換結果とqregの識別子を取得
     # 出力用の行を格納するリスト
     output_lines = add_headers()  # ヘッダーを追加
-    body_lines, qreg_id = add_gates(input_content)  # ボディ変換結果とqregの識別子を取得
     output_lines.extend(body_lines)  # ボディを追加
     output_lines.extend(add_footers(qreg_id))  # フッターを追加
 
