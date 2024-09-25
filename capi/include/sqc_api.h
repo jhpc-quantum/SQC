@@ -61,7 +61,6 @@ typedef struct{
 ///       MAX_N_GATES以上の操作を保持することはできない。
 typedef struct{
   // --- common parameters --- 
-  int       no;
   int       qubits;
   int       ngates; 
   gate_info gate[MAX_N_GATES]; 
