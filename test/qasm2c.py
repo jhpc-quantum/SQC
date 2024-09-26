@@ -1,9 +1,9 @@
 import sys
 
-# ヘッダー部を返す関数
-
+##
+# @brief ヘッダー部の生成
+# @return 生成したヘッダーのリスト
 def add_headers():
-
     headers = [
         '#include "sqc_api.h"\n'
         '#include <stdio.h>\n'
@@ -27,27 +27,27 @@ def add_headers():
     ]
     return headers
 
-# ボディ部を生成する関数（ゲート変換部分）
-# 変換例：
-# qreg q[4];
-# ↓ 
-# sqcQC* q;
-# q = sqcQuantumCircuit(4);
-
+##
+# @brief ボディ部の生成（ゲート変換部分）
 def add_gates(input_content):
-
     output_lines = []
     qreg_name = []
     qubit_count = []
+    unsupported_lines = []
+    skip_lines = ['OPENQASM 2.0;', 'include "qelib1.inc";']  # 変換対象外の構文リスト
 
     for line in input_content:
         stripped_line = line.strip()
 
-        # qregの変換処理
+        ##
+        # @brief qregの変換処理
+        # before：
+        #   qreg q[4];
+        # after：
+        #   sqcQC* q;
+        #   q = sqcQuantumCircuit(4);
         if stripped_line.startswith('qreg'):
             qregs = stripped_line.split()[1].split(',')
-
-            # 変数名と量子ビット数をリストとして抽出
             qreg_name = [qreg.split('[')[0] for qreg in qregs]  # 変数名をリストとして抽出
             qubit_count = [qreg.split('[')[1].split(']')[0] for qreg in qregs]  # qubit数をリストとして抽出
 
@@ -56,25 +56,63 @@ def add_gates(input_content):
 
             for qreg_id, count in zip(qreg_name, qubit_count):
                 output_lines.append(f"  sqcQC* {qreg_id};\n")
-                output_lines.append(f"  {qreg_id} = sqcQuantumCircuit({count});\n")
+                output_lines.append(f"  {qreg_id} = sqcQuantumCircuit({count}); /* 古典ビット数はqubitsと同数 */\n\n")
+
+        ##
+        # @brief "cx" ゲートの変換
+        # before：
+        #   cx q[0],q[1];
+        # after：
+        #   sqcCXGate(q, 0, 1);
+        elif stripped_line.startswith('cx'):
+            cx_qubits = [bit[2] for bit in stripped_line[3:].split(',')]
+            output_lines.append(f'  sqcCXGate({qreg_id}, {cx_qubits[0]}, {cx_qubits[1]});\n')
+
+        ##
+        # @brief "rz" ゲートの変換
+        # before：
+        #   rz(-0.08567393067678994) q[1];
+        # after：
+        #   sqcRZGate(q, -0.08567393067678994, 1);
+        elif stripped_line.startswith('rz'):
+            rz_phi = stripped_line.split('(')[1].split(')')[0]  # 回転角を取得
+            rz_qubit = stripped_line.split()[1][2]  # qubit数を取得
+            output_lines.append(f'  sqcRZGate({qreg_id}, {rz_phi}, {rz_qubit});\n')
+
+        ##
+        # @brief "h" ゲートの変換
+        # before：
+        #   h q[0];
+        # after：
+        #   sqcHGate(q, 0);
+        elif stripped_line.startswith('h'):
+            h_qubit = stripped_line.split()[1][2]  # qubit数を取得
+            output_lines.append(f'  sqcHGate(q, {h_qubit});\n')
+
+        ##
+        # @brief 未変換ゲートの抽出
         else:
-            # C言語のコメント形式に変換する処理
-            output_lines.append(f"// 一時的にコメントに変換: {stripped_line}\n")
+            if stripped_line not in skip_lines and stripped_line:  # 空行はスキップ
+                unsupported_lines.append(stripped_line)
+    ##
+    # @brief 未対応ゲートのログ出力
+    if unsupported_lines:
+        for unsupported in unsupported_lines:
+            print(f" 未対応のゲート： {unsupported}")
 
     return output_lines, qreg_id  # ボディ変換結果とqregの識別子のリストを返す
 
-# フッター部を返す関数
-
+##
+# @brief フッター部の生成
 def add_footers(qreg_id):
-
     footer = [
-            "  FILE * IR_file = NULL;\n",
-            '  IR_file = fopen(__FILE__ "_IR.txt", "w");\n',
-            f"  sqcStoreQC({qreg_id}, IR_file, false);\n",
+            "\n  FILE * IR_file = NULL;\n",
+            '  IR_file = fopen(__FILE__"_IR.txt", "w");\n',
+            f"  sqcStoreQC({qreg_id}, IR_file ,false);\n",
             "  fclose(IR_file);\n\n",
             f"  sqcTranspile({qreg_id}, KIND, &opt);\n\n",
             "  FILE * Transpile_file = NULL;\n",
-            '  Transpile_file = fopen(__FILE__ "_TP.txt", "w");\n',
+            '  Transpile_file = fopen(__FILE__"_TP.txt", "w");\n',
             f"  sqcStoreQC({qreg_id}, Transpile_file ,true);\n",
             "  fclose(Transpile_file);\n\n",
             f"  sqcDestroyQuantumCircuit({qreg_id});\n",
@@ -84,13 +122,15 @@ def add_footers(qreg_id):
     ]
     return footer
 
-# メイン処理
-# 入力ファイルを読み込む
-
+##
+# @brief 変換メイン処理
 def convert_to_c(input_file, output_file):
-
+    # 入力ファイルを読み込む
     with open(input_file, 'r') as file:
         input_content = file.readlines()
+        # バージョンチェック
+        if not any('OPENQASM 2.0;' in line for line in input_content):
+            raise KeyError("エラー: OPENQASM 2.0のみ対応しています。")
 
     body_lines, qreg_id = add_gates(input_content)  # ボディ変換結果とqregの識別子を取得
     # 出力用の行を格納するリスト
