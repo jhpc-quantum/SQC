@@ -1,6 +1,8 @@
 /// \file
 /// qasm3を生成するAPI
 
+#include <stdio.h>
+
 /// \brief sqcTranspileにてproviderを指定するenum
 typedef enum {
   BasicSimulator,    ///< BasicSimulator
