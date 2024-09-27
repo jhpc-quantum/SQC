@@ -1,38 +1,43 @@
 #include "sqc_api.h"
-#include <stdio.h>
 #include <stdlib.h>
 
 int main(int argc, char *argv[])
 {
   const int qubits = 2;
-  sqc_ir qcir;
-  PROVIDERS provider = Fake20QV1;
-  const int opt_level = 1;
+  sqcQC* qcir;
+  sqcTranspileKind provider = Fake20QV1;
+  sqcFakeProviderOption opt = {1};
 
-  sqc_Initialize(); 
+  sqcInitialize(); 
 
-  qcir = sqc_Circuit(qubits); /* 古典ビット数はqubitsと同数 */
+  qcir = sqcQuantumCircuit(qubits);
 
-  sqc_RXGate(qcir, 1, 0);
+  sqcRXGate(qcir, 1, 0);
 
   char* str = (char *)malloc(500);
-  int len = sqc_Dump(qcir, str, 500);
+  int len = sqcStoreQCtoMemory(qcir, str, 500, storeQCStop);
   if (len <= 0){
     printf("Buffer is short\n");
     free(str);
+    sqcDestroyQuantumCircuit(qcir);
+    sqcFinalize(); 
     return 1;
   }
-  printf("-- return sqc_Dump (%d) --\n%s\n",len, str);
+  printf("-- return sqcStoreQCtoMemory before sqcTranspile (%d) --\n%s\n",len, str);
 
-  len = sqc_Transpile(qcir, str, 500, provider, opt_level);
+  sqcTranspile(qcir, provider, &opt);
+  len = sqcStoreQCtoMemory(qcir, str, 500, storeQCStop);
    if (len <= 0){
     printf("Buffer is short\n");
     free(str);
+    sqcDestroyQuantumCircuit(qcir);
+    sqcFinalize(); 
     return 1;
   }
-  printf("-- return sqc_Transpile (%d) --\n%s\n",len, str);
+  printf("-- return sqcStoreQCtoMemory after sqcTranspile (%d) --\n%s\n",len, str);
 
   free(str);
-  sqc_Finalize();
+  sqcDestroyQuantumCircuit(qcir);
+  sqcFinalize();
   return 0;
 }
