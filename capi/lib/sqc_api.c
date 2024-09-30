@@ -208,7 +208,7 @@ void sqcMeasure(sqcQC* qcHandle, int qubitNumber, int clbitNumber, sqcMeasureOpt
     qcHandle->ngates++;
 }
 
-int sqcStoreQCtoMemory(sqcQC* qcHandle, void* address, int size, sqcStoreQCOptionKind kind)
+int sqcStoreQCtoMemory(sqcQC* qcHandle, void* address, size_t size, sqcStoreQCOptionKind kind)
 {
     if(qcHandle->pyTranspiledQuantumCircuit == NULL && qcHandle->ngates == 0){
         switch(kind){
@@ -222,11 +222,6 @@ int sqcStoreQCtoMemory(sqcQC* qcHandle, void* address, int size, sqcStoreQCOptio
                 printf("This function is not available because there is no QuantumCircuit.\n");
                 break;
         }
-    }
-    
-    if(size < 0){
-        printf("Negative numbers are not supported.");
-        return -1;
     }
 
     size_t buflen;
@@ -245,7 +240,7 @@ int sqcStoreQCtoMemory(sqcQC* qcHandle, void* address, int size, sqcStoreQCOptio
         Py_XDECREF(pyTranspiledStr);
 
         buflen = strlen(qasmStrTranspiled)+1;
-        if ((size_t)size < buflen) {
+        if (size < buflen) {
             // ユーザから渡されたバッファ長が短い場合はエラー復帰
             return -1;
         }
@@ -253,7 +248,7 @@ int sqcStoreQCtoMemory(sqcQC* qcHandle, void* address, int size, sqcStoreQCOptio
     } else {
         char* tmpbuf = gateInfo2qasm(qcHandle);
         buflen = strlen(tmpbuf)+1;
-        if ((size_t)size < buflen) {
+        if (size < buflen) {
             // ユーザから渡されたバッファ長が短い場合はエラー復帰
             free(tmpbuf);
             return -1;

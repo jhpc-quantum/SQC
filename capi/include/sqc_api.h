@@ -212,7 +212,7 @@ void sqcMeasure(sqcQC* qcHandle, int qubitNumber, int clbitNumber, sqcMeasureOpt
 ///
 /// \retval 正の値 正常終了。bufに格納したバイト数を返す。
 /// \retval 負の値 異常終了
-int sqcStoreQCtoMemory(sqcQC* qcHandle, void* address, int size, sqcStoreQCOptionKind kind);
+int sqcStoreQCtoMemory(sqcQC* qcHandle, void* address, size_t size, sqcStoreQCOptionKind kind);
 
 /// \brief 量子回路IRからOpenQASM文字列を生成しファイルに出力する
 /// \param [in] qcHandle 量子回路IRのハンドラ
