@@ -12,10 +12,8 @@ def input_analyze(input_content):
     skip_patterns = [r'OPENQASM\s+.*;', r'include\s+.*;', r'^\s*$']  # 空行を追加
 
     # OPENQASM 2.0のバージョンチェック
-    has_openqasm = any('OPENQASM' in line for line in input_content)
     has_openqasm_2_0 = any(re.search(r'OPENQASM\s*2\.0;', line) for line in input_content)
-
-    if not has_openqasm:
+    if not any('OPENQASM' in line for line in input_content):
         errors.append("Error: OPENQASM version not specified.")
     elif not has_openqasm_2_0:
         errors.append("Error: Only OPENQASM 2.0 is supported.")
@@ -192,13 +190,13 @@ def convert_to_c(input_file, output_file):
     is_valid, result = input_analyze(input_content)
 
     if not is_valid:
-        print(f"Analysis failed:\n{result}")
+        print(f"Analyze failed:\n{result}")
     else:
         qreg_name = result  # 解析成功時にqreg_nameをresultから取得
-        print("Analysis Success")
+        print("Analyze Success")
     # 出力用の行を格納するリスト
     output_lines = add_headers()  # ヘッダーを追加
-    output_lines.extend(add_gates(input_content, qreg_name))  # ボディを追加
+    output_lines.extend(add_gates(input_content, qreg_name))  # ボディ（ゲート変換）を追加
     output_lines.extend(add_footers(qreg_name))  # フッターを追加
 
     # 出力ファイルに書き込む
