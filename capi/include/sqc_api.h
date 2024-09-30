@@ -47,15 +47,15 @@ typedef void* sqcMeasureOptions;
 /// \brief ゲートなどの操作を表現する構造体
 /// \details 量子回路の１つのゲートなどの操作を表現する構造体。
 ///          パラメータが何を意味するかは、操作ごとに設計する。
-///          例えば、id=_CXGateの場合、
+///          例えば、id=CXGateの場合、
 ///          niarg=2, rarg=0であり、iarg[0]が標的qubit番号、iarg[1]が制御qubit番号となっている。
 typedef struct{
-  int    id;               ///< この操作の種別（enum_gates）。_HGateなど。
+  int    id;               ///< この操作の種別（enumGates）。HGateなど。
   int    niarg;            ///< この操作の整数パラメータの数
   int    nrarg;            ///< この操作の実数パラメータの数
   int    iarg[MAX_I_ARGS]; ///< この操作の整数パラメータ
   double rarg[MAX_R_ARGS]; ///< この操作の実数パラメータ
-} gate_info;
+} gateInfo;
 
 /// \brief 量子回路のIRを表現する構造体
 /// \details 量子回路のIRを表現する構造体。
@@ -65,7 +65,7 @@ typedef struct{
   // --- common parameters --- 
   int       qubits;
   int       ngates; 
-  gate_info gate[MAX_N_GATES]; 
+  gateInfo gate[MAX_N_GATES]; 
   void*     pyTranspiledQuantumCircuit;
 } sqcQC;
 
@@ -93,7 +93,6 @@ int sqcInitialize(void);
 /// \brief 量子回路IR領域の取得
 /// \details 量子回路IR領域を取得し、返却する。操作の追加などのAPIは、本APIが返却した値を用いる。
 ///          qubit数と古典ビット数は同数であると想定する。
-///          CIRCUIT_NUM個の量子回路IRを保持できる。
 /// \param [in] qubits 量子回路のqubit数
 ///
 /// \retval NULL 異常終了
@@ -101,131 +100,131 @@ int sqcInitialize(void);
 sqcQC* sqcQuantumCircuit(int qubits);
 
 /// \brief 量子回路IR領域の解放
-/// \param [in] qc_handle 量子回路IRのハンドラ
+/// \param [in] qcHandle 量子回路IRのハンドラ
 ///
 /// \return なし
-void sqcDestroyQuantumCircuit(sqcQC* qc_handle);
+void sqcDestroyQuantumCircuit(sqcQC* qcHandle);
 
 /// \brief 量子回路IRに h gateを追加する
-/// \param [out] qc_handle 量子回路IRのハンドラ
-/// \param [in] qubit_number 対象のqubit番号
+/// \param [out] qcHandle 量子回路IRのハンドラ
+/// \param [in] qubitNumber 対象のqubit番号
 ///
 /// \return なし
 ///
-void sqcHGate(sqcQC* qc_handle, int qubit_number);
+void sqcHGate(sqcQC* qcHandle, int qubitNumber);
 
 /// \brief 量子回路IRに cx gateを追加する
-/// \param [out] qc_handle 量子回路IRのハンドラ
-/// \param [in] qubit_number1 制御ビット番号
-/// \param [in] qubit_number2 標的ビット番号
+/// \param [out] qcHandle 量子回路IRのハンドラ
+/// \param [in] qubitNumber1 制御ビット番号
+/// \param [in] qubitNumber2 標的ビット番号
 ///
 /// \return なし
 ///
-void sqcCXGate(sqcQC* qc_handle, int qubit_number1, int qubit_number2);
+void sqcCXGate(sqcQC* qcHandle, int qubitNumber1, int qubitNumber2);
 
 /// \brief 量子回路IRに cz gateを追加する
-/// \param [out] qc_handle 量子回路IRのハンドラ
-/// \param [in] qubit_number1 制御ビット番号
-/// \param [in] qubit_number2 標的ビット番号
+/// \param [out] qcHandle 量子回路IRのハンドラ
+/// \param [in] qubitNumber1 制御ビット番号
+/// \param [in] qubitNumber2 標的ビット番号
 ///
 /// \return なし
 ///
-void sqcCZGate(sqcQC* qc_handle, int qubit_number1, int qubit_number2);
+void sqcCZGate(sqcQC* qcHandle, int qubitNumber1, int qubitNumber2);
 
 /// \brief 量子回路IRに rx gateを追加する
-/// \param [out] qc_handle 量子回路IRのハンドラ
+/// \param [out] qcHandle 量子回路IRのハンドラ
 /// \param [in] theta 回転角
-/// \param [in] qubit_number 標的ビット番号
+/// \param [in] qubitNumber 標的ビット番号
 ///
 /// \return なし
 ///
-void sqcRXGate(sqcQC* qc_handle, double theta, int qubit_number);
+void sqcRXGate(sqcQC* qcHandle, double theta, int qubitNumber);
 
 /// \brief 量子回路IRに ry gateを追加する
-/// \param [out] qc_handle 量子回路IRのハンドラ
+/// \param [out] qcHandle 量子回路IRのハンドラ
 /// \param [in] theta 回転角
-/// \param [in] qubit_number 標的ビット番号
+/// \param [in] qubitNumber 標的ビット番号
 ///
 /// \return なし
 ///
-void sqcRYGate(sqcQC* qc_handle, double theta, int qubit_number);
+void sqcRYGate(sqcQC* qcHandle, double theta, int qubitNumber);
 
 /// \brief 量子回路IRに rz gateを追加する
-/// \param [out] qc_handle 量子回路IRのハンドラ
+/// \param [out] qcHandle 量子回路IRのハンドラ
 /// \param [in] phi 回転角
-/// \param [in] qubit_number 標的ビット番号
+/// \param [in] qubitNumber 標的ビット番号
 ///
 /// \return なし
 ///
-void sqcRZGate(sqcQC* qc_handle, double phi, int qubit_number);
+void sqcRZGate(sqcQC* qcHandle, double phi, int qubitNumber);
 
 /// \brief 量子回路IRに s gateを追加する
-/// \param [out] qc_handle 量子回路IRのハンドラ
-/// \param [in] qubit_number 標的ビット番号
+/// \param [out] qcHandle 量子回路IRのハンドラ
+/// \param [in] qubitNumber 標的ビット番号
 ///
 /// \return なし
 ///
-void sqcSGate(sqcQC* qc_handle, int qubit_number);
+void sqcSGate(sqcQC* qcHandle, int qubitNumber);
 
 /// \brief 量子回路IRに sdg gateを追加する
-/// \param [out] qc_handle 量子回路IRのハンドラ
-/// \param [in] qubit_number 標的ビット番号
+/// \param [out] qcHandle 量子回路IRのハンドラ
+/// \param [in] qubitNumber 標的ビット番号
 ///
 /// \return なし
 ///
-void sqcSdgGate(sqcQC* qc_handle, int qubit_number);
+void sqcSdgGate(sqcQC* qcHandle, int qubitNumber);
 
 /// \brief 量子回路IRに x gateを追加する
-/// \param [out] qc_handle 量子回路IRのハンドラ
-/// \param [in] qubit_number 標的ビット番号
+/// \param [out] qcHandle 量子回路IRのハンドラ
+/// \param [in] qubitNumber 標的ビット番号
 ///
 /// \return なし
 ///
-void sqcXGate(sqcQC* qc_handle, int qubit_number);
+void sqcXGate(sqcQC* qcHandle, int qubitNumber);
 
 /// \brief 量子回路IRに u1 gateを追加する
-/// \param [out] qc_handle 量子回路IRのハンドラ
+/// \param [out] qcHandle 量子回路IRのハンドラ
 /// \param [in] lam 回転角
-/// \param [in] qubit_number 標的ビット番号
+/// \param [in] qubitNumber 標的ビット番号
 ///
 /// \retval 0 正常終了
 /// \retval それ以外 異常終了
 ///
-void sqcU1Gate(sqcQC* qc_handle, double lam, int qubit_number);
+void sqcU1Gate(sqcQC* qcHandle, double lam, int qubitNumber);
 
 /// \brief 量子回路IRに Measureを追加する
-/// \param [out] qc_handle 量子回路IRのハンドラ
-/// \param [in] qubit_number 測定する量子ビット番号
-/// \param [in] clbit_number 古典ビット番号
+/// \param [out] qcHandle 量子回路IRのハンドラ
+/// \param [in] qubitNumber 測定する量子ビット番号
+/// \param [in] clbitNumber 古典ビット番号
 /// \param [in] options オプションを指示するためのデータ構造
 ///
 /// \return なし
 ///
 /// \TODO 存在しないビット番号が指定されたかのチェックは実施していない。
 /// \TODO 操作を追加できない状態（MAX_N_GATES数を超える操作追加）かのチェックは実施していない。
-void sqcMeasure(sqcQC* qc_handle, int qubit_number, int clbit_number, sqcMeasureOptions options);
+void sqcMeasure(sqcQC* qcHandle, int qubitNumber, int clbitNumber, sqcMeasureOptions options);
 
 /// \brief 量子回路IRからOpenQASM文字列を生成しメモリに出力する
-/// \param [in] qc_handle 量子回路IRのハンドラ
+/// \param [in] qcHandle 量子回路IRのハンドラ
 /// \param [out] address OpenQASM文字列を格納するバッファのポインタ
 /// \param [in] size バッファのサイズ
 /// \param [in] kind 利用する回路がない場合のエラー出力のオプション
 ///
 /// \retval 正の値 正常終了。bufに格納したバイト数を返す。
 /// \retval 負の値 異常終了
-int sqcStoreQCtoMemory(sqcQC* qc_handle, void* address, int size, sqcStoreQCOptionKind kind);
+int sqcStoreQCtoMemory(sqcQC* qcHandle, void* address, int size, sqcStoreQCOptionKind kind);
 
 /// \brief 量子回路IRからOpenQASM文字列を生成しファイルに出力する
-/// \param [in] qc_handle 量子回路IRのハンドラ
+/// \param [in] qcHandle 量子回路IRのハンドラ
 /// \param [out] file 書き込み対象のファイルのハンドラ
 /// \param [in] kind 利用する回路がない場合のエラー出力のオプション
 ///
 /// \retval 0 正常終了
 /// \retval その他 異常終了
-int sqcStoreQC(sqcQC* qc_handle, FILE* file, sqcStoreQCOptionKind kind);
+int sqcStoreQC(sqcQC* qcHandle, FILE* file, sqcStoreQCOptionKind kind);
 
 /// \brief 量子回路IRをTranspileし、その回路情報をPyObject型で出力する
-/// \param [in] qc_handle 量子回路IRのハンドラ
+/// \param [in] qcHandle 量子回路IRのハンドラ
 /// \param [in] kind Transpile対象のプロバイダ番号
 /// \param [in] options オプションを指示するためのデータ構造
 ///
@@ -237,10 +236,10 @@ int sqcStoreQC(sqcQC* qc_handle, FILE* file, sqcStoreQCOptionKind kind);
 ///       3. sqcTranspiledOptions型の変数を上記の変数へのアドレスで初期化する。
 ///       4. sqcTranspileの引数"options"にsqcTranspiledOptions型の変数を指定する。
 ///
-/// \TODO 現時点では、transpileに指定可能なproviderは、provider_infoで定義されているもののみ。
+/// \TODO 現時点では、transpileに指定可能なproviderは、providerInfoで定義されているもののみ。
 ///       現在の設計はproviderのオブジェクトの生成に引数が不要な場合しか想定していないため、
 ///       providerのオブジェクトの生成に引数が必要なものに対応する場合はI/Fの検討が必要。
-void sqcTranspile(sqcQC* qc_handle, sqcTranspileKind kind, sqcTranspileOptions options);
+void sqcTranspile(sqcQC* qcHandle, sqcTranspileKind kind, sqcTranspileOptions options);
 
 /// \brief C-APIの利用終了を宣言する
 ///
