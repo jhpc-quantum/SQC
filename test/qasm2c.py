@@ -1,28 +1,24 @@
 ##
 # @file qasm2c.py
-# @brief 簡単な説明
-# @copyright
-
+# @brief Script to generate C-API tests.
 import sys
 import re
 
+##
 # @brief Parses the input.
-# @details Function to parse the contents of the OPENQASM 2.0 file and check for qreg variable names and unsupported syntax.
-# @param[in] input_content List containing each line of the OPENQASM 2.0 file to be parsed.
-# @return True if the parsing was successful and there were no errors.
-# @return False Returns False if an error occurred.
+# @param[in] input_content List containing each line of the OPENQASM file to be parsed.
+# @return True if the parsing was successful and there were no errors; False if an error occurred.
 # @return qreg_name Returns the first qreg variable name found in the qreg syntax. Returns an error message if an error occurred.
 def input_analyze(input_content):
-    supported_syntaxes = ['qreg ', 'cx ', 'rz(', 'h ', 'cz ', 'ry(', 'rx(', 's ', 'sdg ']
-    errors = []
-    unsupported_syntaxes = []
+    supported_syntaxes = ['qreg ', 'cx ', 'rz(', 'h ', 'cz ', 'ry(', 'rx(', 's ', 'sdg ']  # List of supported syntaxes
+    errors = []  # List to store errors
+    unsupported_syntaxes = []  # List to store unsupported syntaxes
     qreg_name = None
-    skip_patterns = [r'OPENQASM\s+.*;', r'include\s+.*;', r'^\s*$']  # 空行を追加
+    skip_patterns = [r'OPENQASM\s+.*;', r'include\s+.*;', r'^\s*$']  # No conversion syntaxs
 
-    has_openqasm_2_0 = any(re.search(r'OPENQASM\s*2\.0;', line) for line in input_content)
     if not any('OPENQASM' in line for line in input_content):
         errors.append("Error: OPENQASM version not specified.")
-    elif not has_openqasm_2_0:
+    elif not any(re.search(r'OPENQASM\s*2\.0;', line) for line in input_content):
         errors.append("Error: Only OPENQASM 2.0 is supported.")
 
     qreg_lines = [line.strip() for line in input_content if line.strip().startswith('qreg')]
@@ -59,8 +55,7 @@ def input_analyze(input_content):
 
 ##
 # @brief Generate header section.
-# @details Generate headers with initialization codes according to required includes and providers.
-# @return headers Returns the generated header section code in list format.
+# @return List of C codes in the generated header section.
 def add_headers():
     headers = [
         '#include "sqc_api.h"\n'
@@ -86,11 +81,10 @@ def add_headers():
     return headers
 
 ##
-# @brief Generate gate transformation part.
-# @details Based on the input content, each quantum gate (qreg, cx, rz, h) is converted to the corresponding function and converted to C code.
-# @param[in] input_content Contents of QASM format to be converted
-# @param[in] qreg_name Variable name of quantum register defined in qreg
-# @return output_lines List of converted C codes
+# @brief Convert gate section.
+# @param[in] input_content Contents of QASM to be converted.
+# @param[in] qreg_name Quantum register identifier.
+# @return output_lines List of converted C codes.
 def add_gates(input_content, qreg_name):
     output_lines = []
 
@@ -119,12 +113,10 @@ def add_gates(input_content, qreg_name):
     return output_lines
 
 ##
-# @brief qreg conversion process.
-# @details Convert QASM qreg syntax to C code. convert qreg definition to sqcQC* type,
-# @brief Generate initialization code for quantum registers.
-# @param[in] stripped_line Line of qreg definition in QASM format
-# @param[in] qreg_name Converted qreg variable name
-# @return output_lines List of lines converted to C code
+# @brief "qreg" conversion process.
+# @param[in] stripped_line Line of qreg definition in QASM format.
+# @param[in] qreg_name Converted qreg variable name.
+# @return output_lines List of converted C codes.
 def transform_qreg(stripped_line, qreg_name):
     output_lines = []
     qregs = stripped_line.split()[1].split(',')
@@ -135,114 +127,98 @@ def transform_qreg(stripped_line, qreg_name):
     return output_lines
 
 ##
-# @brief "cx" ゲートの変換
-# before：
-#   cx q[0],q[1];
-# after：
-#   sqcCXGate(q, 0, 1);
+# @brief "cx" gate conversion process.
+# @param[in] stripped_line Line of cx definition in QASM format.
+# @return output_lines List of converted C codes.
 def transform_cx(stripped_line):
-    # cx q[0],q[1]; からqubit数を抽出
     qubit_count = [bit.split('[')[1].split(']')[0] for bit in stripped_line[3:].split(',')]
     qreg_name = stripped_line.split()[1].split(',')[0].split('[')[0]
 
     return f'  sqcCXGate({qreg_name}, {qubit_count[0]}, {qubit_count[1]});\n'
 
 ##
-# @brief "rz" ゲートの変換
-# before：
-#   rz(-0.08567393067678994) q[1];
-# after：
-#   sqcRZGate(q, -0.08567393067678994, 1);
+# @brief "rz" gate conversion process.
+# @param[in] stripped_line Line of rz definition in QASM format.
+# @return output_lines List of converted C codes.
 def transform_rz(stripped_line):
-    rz_phi = stripped_line.split('(')[1].split(')')[0]  # 回転角を取得
+    rz_phi = stripped_line.split('(')[1].split(')')[0]
     rz_qubit = stripped_line.split()[1]
-    qubit_count = rz_qubit.split('[')[1].split(']')[0]  # qubit数を取得
-    qreg_name = rz_qubit.split('[')[0]  # qregの名前を取得
+    qubit_count = rz_qubit.split('[')[1].split(']')[0]
+    qreg_name = rz_qubit.split('[')[0]
 
     return f'  sqcRZGate({qreg_name}, {rz_phi}, {qubit_count});\n'
 
 ##
-# @brief "h" ゲートの変換
-# before：
-#   h q[0];
-# after：
-#   sqcHGate(q, 0);
+# @brief "h" gate conversion process.
+# @param[in] stripped_line Line of h definition in QASM format.
+# @return output_lines List of converted C codes.
 def transform_h(stripped_line):
     h_qubit = stripped_line.split()[1]
-    qubit_count = h_qubit.split('[')[1].split(']')[0]  # qubit数を取得
-    qreg_name = h_qubit.split('[')[0]  # qregの名前を取得
+    qubit_count = h_qubit.split('[')[1].split(']')[0]
+    qreg_name = h_qubit.split('[')[0]
 
     return f'  sqcHGate({qreg_name}, {qubit_count});\n'
 
 ##
-# @brief "cx" ゲートの変換
-# before：
-#   cx q[0],q[1];
-# after：
-#   sqcCXGate(q, 0, 1);
+# @brief "cz" gate conversion process.
+# @param[in] stripped_line Line of cz definition in QASM format.
+# @return output_lines List of converted C codes.
 def transform_cz(stripped_line):
-    # cz q[0],q[1]; からqubit数を抽出
     qubit_count = [bit.split('[')[1].split(']')[0] for bit in stripped_line[3:].split(',')]
     qreg_name = stripped_line.split()[1].split(',')[0].split('[')[0]
 
     return f'  sqcCZGate({qreg_name}, {qubit_count[0]}, {qubit_count[1]});\n'
 
 ##
-# @brief "ry" ゲートの変換
-# before：
-#   ry(-0.08567393067678994) q[1];
-# after：
-#   sqcRYGate(q, -0.08567393067678994, 1);
+# @brief "ry" gate conversion process.
+# @param[in] stripped_line Line of ry definition in QASM format.
+# @return output_lines List of converted C codes.
 def transform_ry(stripped_line):
-    ry_theta = stripped_line.split('(')[1].split(')')[0]  # 回転角を取得
+    ry_theta = stripped_line.split('(')[1].split(')')[0]
     ry_qubit = stripped_line.split()[1]
-    qubit_count = ry_qubit.split('[')[1].split(']')[0]  # qubit数を取得
-    qreg_name = ry_qubit.split('[')[0]  # qregの名前を取得
+    qubit_count = ry_qubit.split('[')[1].split(']')[0]
+    qreg_name = ry_qubit.split('[')[0]
 
     return f'  sqcRYGate({qreg_name}, {ry_theta}, {qubit_count});\n'
 
 ##
-# @brief "rx" ゲートの変換
-# before：
-#   rx(-0.08567393067678994) q[1];
-# after：
-#   sqcRXGate(q, -0.08567393067678994, 1);
+# @brief "rx" gate conversion process.
+# @param[in] stripped_line Line of rx definition in QASM format.
+# @return output_lines List of converted C codes.
 def transform_rx(stripped_line):
-    rx_theta = stripped_line.split('(')[1].split(')')[0]  # 回転角を取得
+    rx_theta = stripped_line.split('(')[1].split(')')[0]
     rx_qubit = stripped_line.split()[1]
-    qubit_count = rx_qubit.split('[')[1].split(']')[0]  # qubit数を取得
-    qreg_name = rx_qubit.split('[')[0]  # qregの名前を取得
+    qubit_count = rx_qubit.split('[')[1].split(']')[0]
+    qreg_name = rx_qubit.split('[')[0]
 
     return f'  sqcRXGate({qreg_name}, {rx_theta}, {qubit_count});\n'
 
 ##
-# @brief "s" ゲートの変換
-# before：
-#   s q[0];
-# after：
-#   sqcSGate(q, 0);
+# @brief "s" gate conversion process.
+# @param[in] stripped_line Line of s definition in QASM format.
+# @return output_lines List of converted C codes.
 def transform_s(stripped_line):
     s_qubit = stripped_line.split()[1]
-    qubit_count = s_qubit.split('[')[1].split(']')[0]  # qubit数を取得
-    qreg_name = s_qubit.split('[')[0]  # qregの名前を取得
+    qubit_count = s_qubit.split('[')[1].split(']')[0]
+    qreg_name = s_qubit.split('[')[0]
 
     return f'  sqcSGate({qreg_name}, {qubit_count});\n'
 
 ##
-# @brief "sdg" ゲートの変換
-# before：
-#   sdg q[0];
-# after：
-#   sqcSdgGate(q, 0);
+# @brief "sdg" gate conversion process.
+# @param[in] stripped_line Line of s definition in QASM format.
+# @return output_lines List of converted C codes.
 def transform_sdg(stripped_line):
     sdg_qubit = stripped_line.split()[1]
-    qubit_count = sdg_qubit.split('[')[1].split(']')[0]  # qubit数を取得
-    qreg_name = sdg_qubit.split('[')[0]  # qregの名前を取得
+    qubit_count = sdg_qubit.split('[')[1].split(']')[0]
+    qreg_name = sdg_qubit.split('[')[0]
 
     return f'  sqcSdgGate({qreg_name}, {qubit_count});\n'
 
 ##
-# @brief フッター部の生成
+# @brief Generate footer section.
+# @param[in] qreg_name Converted qreg variable name.
+# @return List of C codes in the generated header section.
 def add_footers(qreg_name):
     footer = [
             "\n  FILE * IR_file = NULL;\n",
@@ -263,32 +239,30 @@ def add_footers(qreg_name):
     return footer
 
 ##
-# @brief 変換メイン処理
+# @brief Converts a QASM file to C code and writes it to the output file.
+# @param[in] input_file The path to the QASM input file to be converted.
+# @param[in] output_file The path to the output file where the C code will be written.
+# @return None
 def convert_to_c(input_file, output_file):
-    # 入力ファイルを読み込む
     with open(input_file, 'r') as file:
         input_content = file.readlines()
-    # 入力ファイルの解析
     is_valid, result = input_analyze(input_content)
 
     if not is_valid:
         print(f"Analyze failed:\n{result}")
     else:
-        qreg_name = result  # 解析成功時にqreg_nameをresultから取得
+        qreg_name = result
         print("Analyze Success")
-    # 出力用の行を格納するリスト
-    output_lines = add_headers()  # ヘッダーを追加
-    output_lines.extend(add_gates(input_content, qreg_name))  # ボディ（ゲート変換）を追加
-    output_lines.extend(add_footers(qreg_name))  # フッターを追加
+    output_lines = add_headers()
+    output_lines.extend(add_gates(input_content, qreg_name))
+    output_lines.extend(add_footers(qreg_name))
 
-    # 出力ファイルに書き込む
     with open(output_file, 'w') as file:
         file.writelines(output_lines)
 
     print(f"Conversion Complete: {output_file}")
 
 if __name__ == "__main__":
-    # コマンドライン引数から入力ファイル名と出力ファイル名を取得
     input_file = sys.argv[1]
     output_file = sys.argv[2]
     convert_to_c(input_file, output_file)
