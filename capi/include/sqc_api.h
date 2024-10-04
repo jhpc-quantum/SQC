@@ -38,7 +38,8 @@ typedef struct{
 typedef void* sqcMeasureOptions;
 
 /// \brief 量子回路のIRに保存できるゲート情報の数
-#define MAX_N_GATES 128 
+/// \note The maximum number of gates in the VQE-generated-dataset used in the test is 36500, so we have matched it.
+#define MAX_N_GATES 40000 
 /// \brief ゲートの整数パラメータの最大数
 #define MAX_I_ARGS  2
 /// \brief ゲートの実数パラメータの最大数
