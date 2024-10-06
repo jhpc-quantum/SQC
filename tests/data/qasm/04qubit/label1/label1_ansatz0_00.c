@@ -1,0 +1,254 @@
+#include "sqc_api.h"
+#include <stdlib.h>
+#include <string.h>
+
+#if defined(FAKE_PROVIDER) 
+#define KIND (Fake20QV1)
+#ifndef OPT_LEVEL
+sqcFakeProviderOption opt = {0};
+#else
+sqcFakeProviderOption opt = {OPT_LEVEL};
+#endif
+#elif defined(IBM_PROVIDER)
+#fatal /* Not Implemented */
+#else /* other */
+#fatal 
+#endif
+
+int main(int argc, char *argv[])
+{
+  sqcInitialize();
+
+  sqcQC* q;
+  q = sqcQuantumCircuit(4);
+
+  sqcHGate(q, 0);
+  sqcHGate(q, 1);
+  sqcCXGate(q, 0, 1);
+  sqcRZGate(q, 0.16721170933598473, 1);
+  sqcCXGate(q, 0, 1);
+  sqcHGate(q, 0);
+  sqcHGate(q, 1);
+  sqcSdgGate(q, 0);
+  sqcHGate(q, 0);
+  sqcSdgGate(q, 1);
+  sqcHGate(q, 1);
+  sqcCXGate(q, 0, 1);
+  sqcRZGate(q, -0.24772241038272672, 1);
+  sqcCXGate(q, 0, 1);
+  sqcHGate(q, 0);
+  sqcSGate(q, 0);
+  sqcHGate(q, 1);
+  sqcSGate(q, 1);
+  sqcCXGate(q, 0, 1);
+  sqcRZGate(q, -0.06316749037591818, 1);
+  sqcCXGate(q, 0, 1);
+  sqcHGate(q, 1);
+  sqcHGate(q, 2);
+  sqcCXGate(q, 1, 2);
+  sqcRZGate(q, 1.7662743110428085, 2);
+  sqcCXGate(q, 1, 2);
+  sqcHGate(q, 1);
+  sqcHGate(q, 2);
+  sqcSdgGate(q, 1);
+  sqcHGate(q, 1);
+  sqcSdgGate(q, 2);
+  sqcHGate(q, 2);
+  sqcCXGate(q, 1, 2);
+  sqcRZGate(q, -1.8857310699039767, 2);
+  sqcCXGate(q, 1, 2);
+  sqcHGate(q, 1);
+  sqcSGate(q, 1);
+  sqcHGate(q, 2);
+  sqcSGate(q, 2);
+  sqcCXGate(q, 1, 2);
+  sqcRZGate(q, -0.21111486003830102, 2);
+  sqcCXGate(q, 1, 2);
+  sqcHGate(q, 2);
+  sqcHGate(q, 3);
+  sqcCXGate(q, 2, 3);
+  sqcRZGate(q, -0.3241890251617344, 3);
+  sqcCXGate(q, 2, 3);
+  sqcHGate(q, 2);
+  sqcHGate(q, 3);
+  sqcSdgGate(q, 2);
+  sqcHGate(q, 2);
+  sqcSdgGate(q, 3);
+  sqcHGate(q, 3);
+  sqcCXGate(q, 2, 3);
+  sqcRZGate(q, -0.10708126332006696, 3);
+  sqcCXGate(q, 2, 3);
+  sqcHGate(q, 2);
+  sqcSGate(q, 2);
+  sqcHGate(q, 3);
+  sqcSGate(q, 3);
+  sqcCXGate(q, 2, 3);
+  sqcRZGate(q, 0.41711513328884725, 3);
+  sqcCXGate(q, 2, 3);
+  sqcRZGate(q, -0.18865804682370535, 0);
+  sqcRZGate(q, 0.2668038512939228, 1);
+  sqcRZGate(q, 0.1108138487770348, 2);
+  sqcRZGate(q, 0.3026506314698757, 3);
+  sqcRXGate(q, -0.7781127098203541, 0);
+  sqcRXGate(q, -0.35856142610775477, 1);
+  sqcRXGate(q, 0.9364009188218134, 2);
+  sqcRXGate(q, -0.9646083682627289, 3);
+  sqcHGate(q, 0);
+  sqcHGate(q, 1);
+  sqcCXGate(q, 0, 1);
+  sqcRZGate(q, -0.17172107505994866, 1);
+  sqcCXGate(q, 0, 1);
+  sqcHGate(q, 0);
+  sqcHGate(q, 1);
+  sqcSdgGate(q, 0);
+  sqcHGate(q, 0);
+  sqcSdgGate(q, 1);
+  sqcHGate(q, 1);
+  sqcCXGate(q, 0, 1);
+  sqcRZGate(q, 0.3724886042480223, 1);
+  sqcCXGate(q, 0, 1);
+  sqcHGate(q, 0);
+  sqcSGate(q, 0);
+  sqcHGate(q, 1);
+  sqcSGate(q, 1);
+  sqcCXGate(q, 0, 1);
+  sqcRZGate(q, -0.24798176638767633, 1);
+  sqcCXGate(q, 0, 1);
+  sqcHGate(q, 1);
+  sqcHGate(q, 2);
+  sqcCXGate(q, 1, 2);
+  sqcRZGate(q, 1.56001218548071, 2);
+  sqcCXGate(q, 1, 2);
+  sqcHGate(q, 1);
+  sqcHGate(q, 2);
+  sqcSdgGate(q, 1);
+  sqcHGate(q, 1);
+  sqcSdgGate(q, 2);
+  sqcHGate(q, 2);
+  sqcCXGate(q, 1, 2);
+  sqcRZGate(q, -0.7184738212940308, 2);
+  sqcCXGate(q, 1, 2);
+  sqcHGate(q, 1);
+  sqcSGate(q, 1);
+  sqcHGate(q, 2);
+  sqcSGate(q, 2);
+  sqcCXGate(q, 1, 2);
+  sqcRZGate(q, 0.2770554421287524, 2);
+  sqcCXGate(q, 1, 2);
+  sqcHGate(q, 2);
+  sqcHGate(q, 3);
+  sqcCXGate(q, 2, 3);
+  sqcRZGate(q, 0.0510451975311574, 3);
+  sqcCXGate(q, 2, 3);
+  sqcHGate(q, 2);
+  sqcHGate(q, 3);
+  sqcSdgGate(q, 2);
+  sqcHGate(q, 2);
+  sqcSdgGate(q, 3);
+  sqcHGate(q, 3);
+  sqcCXGate(q, 2, 3);
+  sqcRZGate(q, 0.20629118351485615, 3);
+  sqcCXGate(q, 2, 3);
+  sqcHGate(q, 2);
+  sqcSGate(q, 2);
+  sqcHGate(q, 3);
+  sqcSGate(q, 3);
+  sqcCXGate(q, 2, 3);
+  sqcRZGate(q, -0.37247022046866424, 3);
+  sqcCXGate(q, 2, 3);
+  sqcRZGate(q, -0.18013775116480138, 0);
+  sqcRZGate(q, 0.5892555539347076, 1);
+  sqcRZGate(q, 0.07738613391275573, 2);
+  sqcRZGate(q, -0.3065241237112741, 3);
+  sqcRXGate(q, -1.53435763987193, 0);
+  sqcRXGate(q, -1.1593733617253494, 1);
+  sqcRXGate(q, 0.7344779311570248, 2);
+  sqcRXGate(q, -0.9569319098796639, 3);
+  sqcHGate(q, 0);
+  sqcHGate(q, 1);
+  sqcCXGate(q, 0, 1);
+  sqcRZGate(q, 0.026571887767281182, 1);
+  sqcCXGate(q, 0, 1);
+  sqcHGate(q, 0);
+  sqcHGate(q, 1);
+  sqcSdgGate(q, 0);
+  sqcHGate(q, 0);
+  sqcSdgGate(q, 1);
+  sqcHGate(q, 1);
+  sqcCXGate(q, 0, 1);
+  sqcRZGate(q, 0.6850049707018032, 1);
+  sqcCXGate(q, 0, 1);
+  sqcHGate(q, 0);
+  sqcSGate(q, 0);
+  sqcHGate(q, 1);
+  sqcSGate(q, 1);
+  sqcCXGate(q, 0, 1);
+  sqcRZGate(q, -0.16429476144334793, 1);
+  sqcCXGate(q, 0, 1);
+  sqcHGate(q, 1);
+  sqcHGate(q, 2);
+  sqcCXGate(q, 1, 2);
+  sqcRZGate(q, 1.3915909961063966, 2);
+  sqcCXGate(q, 1, 2);
+  sqcHGate(q, 1);
+  sqcHGate(q, 2);
+  sqcSdgGate(q, 1);
+  sqcHGate(q, 1);
+  sqcSdgGate(q, 2);
+  sqcHGate(q, 2);
+  sqcCXGate(q, 1, 2);
+  sqcRZGate(q, -1.4859166957534058, 2);
+  sqcCXGate(q, 1, 2);
+  sqcHGate(q, 1);
+  sqcSGate(q, 1);
+  sqcHGate(q, 2);
+  sqcSGate(q, 2);
+  sqcCXGate(q, 1, 2);
+  sqcRZGate(q, 0.5364108655342386, 2);
+  sqcCXGate(q, 1, 2);
+  sqcHGate(q, 2);
+  sqcHGate(q, 3);
+  sqcCXGate(q, 2, 3);
+  sqcRZGate(q, 0.24556873362642392, 3);
+  sqcCXGate(q, 2, 3);
+  sqcHGate(q, 2);
+  sqcHGate(q, 3);
+  sqcSdgGate(q, 2);
+  sqcHGate(q, 2);
+  sqcSdgGate(q, 3);
+  sqcHGate(q, 3);
+  sqcCXGate(q, 2, 3);
+  sqcRZGate(q, 0.8283425161783626, 3);
+  sqcCXGate(q, 2, 3);
+  sqcHGate(q, 2);
+  sqcSGate(q, 2);
+  sqcHGate(q, 3);
+  sqcSGate(q, 3);
+  sqcCXGate(q, 2, 3);
+  sqcRZGate(q, -0.0005498346826854174, 3);
+  sqcCXGate(q, 2, 3);
+  sqcRZGate(q, -0.3996178126221735, 0);
+  sqcRZGate(q, -0.19391150190207598, 1);
+  sqcRZGate(q, -0.07879813832149371, 2);
+  sqcRZGate(q, 0.10525185850069416, 3);
+  sqcRXGate(q, -1.0455330532289766, 0);
+  sqcRXGate(q, -0.3915346591189748, 1);
+  sqcRXGate(q, -0.38963143522962795, 2);
+  sqcRXGate(q, -1.2999489181432826, 3);
+
+  FILE * IR_file = NULL;
+  IR_file = fopen(__FILE__"_IR.txt", "w");
+  sqcStoreQC(q, IR_file, storeQCStop);
+  fclose(IR_file);
+
+  sqcTranspile(q, KIND, &opt);
+
+  FILE * Transpile_file = NULL;
+  Transpile_file = fopen(__FILE__"_TP.txt", "w");
+  sqcStoreQC(q, Transpile_file, storeQCStop);
+  fclose(Transpile_file);
+
+  sqcDestroyQuantumCircuit(q);
+  sqcFinalize();
+  return 0;
+}
