@@ -62,21 +62,31 @@ int sqcInitialize(void)
 
     pyImportName = PyUnicode_DecodeFSDefault("qiskit.qasm3");
     PyObject *pyQiskitQasm3 = PyImport_Import(pyImportName);
-    PyErr_Print();
+    if(PyErr_Occurred()){
+        PyErr_Print();
+    }
     Py_XDECREF(pyImportName);
 
     pyImportName = PyUnicode_DecodeFSDefault("qiskit.compiler");
     PyObject *pyQiskitCompiler = PyImport_Import(pyImportName);
-    PyErr_Print();
+    if(PyErr_Occurred()){
+        PyErr_Print();
+    }
 
     mng->pyLoads = PyObject_GetAttrString(pyQiskitQasm3, "loads");
-    PyErr_Print();
+    if(PyErr_Occurred()){
+        PyErr_Print();
+    }
 
     mng->pyDumps = PyObject_GetAttrString(pyQiskitQasm3, "dumps");
-    PyErr_Print();
+    if(PyErr_Occurred()){
+        PyErr_Print();
+    }
 
     mng->pyTranspiler = PyObject_GetAttrString(pyQiskitCompiler, "transpile");
-    PyErr_Print();
+    if(PyErr_Occurred()){
+        PyErr_Print();
+    }
 
     Py_XDECREF(pyQiskitCompiler);
     Py_XDECREF(pyQiskitQasm3);
@@ -225,10 +235,14 @@ int sqcStoreQCtoMemory(sqcQC* qcHandle, void* address, size_t size)
     if(qcHandle->pyTranspiledQuantumCircuit != NULL){
 
         PyObject* pyTranspiledStr = PyObject_CallOneArg(mng->pyDumps, qcHandle->pyTranspiledQuantumCircuit);
-        PyErr_Print();
+        if(PyErr_Occurred()){
+            PyErr_Print();
+        }
         
         const char* qasmStrTranspiled = PyUnicode_AsUTF8(pyTranspiledStr);
-        PyErr_Print();
+        if(PyErr_Occurred()){
+            PyErr_Print();
+        }
         // Do not release pyTranspiledStr here, but release it when qasmStrTranspiled is finished being used
         // PyObject(pyTranspiledStr), the generator, is not released until the end of string usage,
         // in order to release its memory area on the PyObject side.
@@ -278,10 +292,14 @@ int sqcStoreQC(sqcQC* qcHandle, FILE* file)
     if(qcHandle->pyTranspiledQuantumCircuit != NULL){
 
         PyObject* pyTranspiledStr = PyObject_CallOneArg(mng->pyDumps, qcHandle->pyTranspiledQuantumCircuit);
-        PyErr_Print();
+        if(PyErr_Occurred()){
+            PyErr_Print();
+        }
         
         const char* qasmStrTranspiled = PyUnicode_AsUTF8(pyTranspiledStr);
-        PyErr_Print();
+        if(PyErr_Occurred()){
+            PyErr_Print();
+        }
         // Do not release pyTranspiledStr here, but release it when qasmStrTranspiled is finished being used
         // PyObject(pyTranspiledStr), the generator, is not released until the end of string usage,
         // in order to release its memory area on the PyObject side.
@@ -331,21 +349,33 @@ void sqcTranspile(sqcQC* qcHandle, sqcTranspileKind kind, sqcTranspileOptions op
 
     PyObject* pyImportName;
     pyImportName = PyUnicode_DecodeFSDefault(providerInfo[kind][0]);
-    PyErr_Print();
+    if(PyErr_Occurred()){
+        PyErr_Print();
+    }
     PyObject* pyProviderFrom = PyImport_Import(pyImportName);
-    PyErr_Print();
+    if(PyErr_Occurred()){
+        PyErr_Print();
+    }
     PyObject* pyProviderClass = PyObject_GetAttrString(pyProviderFrom, providerInfo[kind][1]);
-    PyErr_Print();
+    if(PyErr_Occurred()){
+        PyErr_Print();
+    }
     PyObject* pyProvider = PyObject_CallNoArgs(pyProviderClass);
-    PyErr_Print();
+    if(PyErr_Occurred()){
+        PyErr_Print();
+    }
     Py_XDECREF(pyImportName);
     Py_XDECREF(pyProviderFrom);
     Py_XDECREF(pyProviderClass);
 
     PyObject* pyTargetQASM = PyUnicode_DecodeFSDefault(qasmStr);
-    PyErr_Print();
+    if(PyErr_Occurred()){
+        PyErr_Print();
+    }
     PyObject* pyCircuit = PyObject_CallOneArg(mng->pyLoads, pyTargetQASM);
-    PyErr_Print();
+    if(PyErr_Occurred()){
+        PyErr_Print();
+    }
     free(qasmStr);
     Py_XDECREF(pyTargetQASM);
 
@@ -363,7 +393,9 @@ void sqcTranspile(sqcQC* qcHandle, sqcTranspileKind kind, sqcTranspileOptions op
     PyDict_SetItemString( pyDictArg, "optimization_level", pyOptLevel);
 
     qcHandle->pyTranspiledQuantumCircuit = PyObject_Call(mng->pyTranspiler, pyArgs, pyDictArg);
-    PyErr_Print();
+    if(PyErr_Occurred()){
+        PyErr_Print();
+    }
     Py_XDECREF(pyArgs);
     Py_XDECREF(pyCircuit);
     Py_XDECREF(pyDictArg);
