@@ -17,13 +17,6 @@ typedef enum {
   NProviders        /// Number of provieders
 } sqcTranspileKind;
 
-/// \brief sqcStoreQCとsqcStoreQCtoMemoryにて利用する回路がないときのエラー出力を指定するenum
-typedef enum {
-  storeQCStop, ///< メッセージを出力して処理を終了する
-  storeQCContinue, ///< メッセージを出力せず処理を継続する
-  storeQCContinueAndMessage ///< メッセージを出力して処理を継続する
-} sqcStoreQCOptionKind;
-
 /// \brief トランスパイル時のオプションを指定するデータ構造
 typedef void* sqcTranspileOptions;
 
@@ -70,6 +63,11 @@ typedef struct{
   void*     pyTranspiledQuantumCircuit;
 } sqcQC;
 
+// Error code of all function.
+/// \brief Function worked correctly.
+#define E_SUCCESS (0)
+
+
 /// \brief C-APIの利用開始を宣言する
 ///
 /// ```
@@ -79,8 +77,7 @@ typedef struct{
 ///   ・qiskit.qasm3.dumpsの関数オブジェクトの保持
 ///   ・qiskit.compiler.transpileの関数オブジェクトの保持
 /// ```
-/// \retval 0 正常終了
-/// \retval それ以外 異常終了
+/// \retval E_SUCCESS Correctly END.
 ///
 /// \note Python C-APIのモジュールによっては
 ///       プロセス内で複数回のPy_Initialize/Py_FinalizeがされるとPythonで例外が発生し、
@@ -188,8 +185,7 @@ void sqcXGate(sqcQC* qcHandle, int qubitNumber);
 /// \param [in] lam 回転角
 /// \param [in] qubitNumber 標的ビット番号
 ///
-/// \retval 0 正常終了
-/// \retval それ以外 異常終了
+/// \return void
 ///
 void sqcU1Gate(sqcQC* qcHandle, double lam, int qubitNumber);
 
@@ -201,28 +197,36 @@ void sqcU1Gate(sqcQC* qcHandle, double lam, int qubitNumber);
 ///
 /// \return なし
 ///
-/// \TODO 存在しないビット番号が指定されたかのチェックは実施していない。
-/// \TODO 操作を追加できない状態（MAX_N_GATES数を超える操作追加）かのチェックは実施していない。
+/// \todo 存在しないビット番号が指定されたかのチェックは実施していない。
+/// \todo 操作を追加できない状態（MAX_N_GATES数を超える操作追加）かのチェックは実施していない。
 void sqcMeasure(sqcQC* qcHandle, int qubitNumber, int clbitNumber, sqcMeasureOptions options);
+
+/// \brief Specified address is NULL of sqcStoreQC and sqcStoreQCtoMemory.
+#define E_NULL_POINTER (-1)
+/// \brief Shortage size to write OpenQASM string of sqcStoreQC and sqcStoreQCtoMemory.
+#define E_SHORTAGE_SIZE (-2)
 
 /// \brief 量子回路IRからOpenQASM文字列を生成しメモリに出力する
 /// \param [in] qcHandle 量子回路IRのハンドラ
 /// \param [out] address OpenQASM文字列を格納するバッファのポインタ
 /// \param [in] size バッファのサイズ
-/// \param [in] kind 利用する回路がない場合のエラー出力のオプション
 ///
 /// \retval 正の値 正常終了。bufに格納したバイト数を返す。
-/// \retval 負の値 異常終了
-int sqcStoreQCtoMemory(sqcQC* qcHandle, void* address, size_t size, sqcStoreQCOptionKind kind);
+/// \retval E_NULL_POINTER Specified "address" is NULL.
+/// \retval E_SHORTAGE_SIZE Shortage size to write OpenQASM string.
+/// \note If there is no circuit that can output, the process continues.
+///       If "debug" is performed at build time, the program will exit with a message.
+int sqcStoreQCtoMemory(sqcQC* qcHandle, void* address, size_t size);
 
 /// \brief 量子回路IRからOpenQASM文字列を生成しファイルに出力する
 /// \param [in] qcHandle 量子回路IRのハンドラ
 /// \param [out] file 書き込み対象のファイルのハンドラ
-/// \param [in] kind 利用する回路がない場合のエラー出力のオプション
 ///
-/// \retval 0 正常終了
-/// \retval その他 異常終了
-int sqcStoreQC(sqcQC* qcHandle, FILE* file, sqcStoreQCOptionKind kind);
+/// \retval E_SUCCESS Correctly END.
+/// \retval E_NULL_POINTER Specified "file" is NULL.
+/// \note If there is no circuit that can output, the process continues.
+///       If "debug" is performed at build time, the program will exit with a message.
+int sqcStoreQC(sqcQC* qcHandle, FILE* file);
 
 /// \brief 量子回路IRをTranspileし、その回路情報をPyObject型で出力する
 /// \param [in] qcHandle 量子回路IRのハンドラ
@@ -237,7 +241,7 @@ int sqcStoreQC(sqcQC* qcHandle, FILE* file, sqcStoreQCOptionKind kind);
 ///       3. sqcTranspiledOptions型の変数を上記の変数へのアドレスで初期化する。
 ///       4. sqcTranspileの引数"options"にsqcTranspiledOptions型の変数を指定する。
 ///
-/// \TODO 現時点では、transpileに指定可能なproviderは、providerInfoで定義されているもののみ。
+/// \todo 現時点では、transpileに指定可能なproviderは、providerInfoで定義されているもののみ。
 ///       現在の設計はproviderのオブジェクトの生成に引数が不要な場合しか想定していないため、
 ///       providerのオブジェクトの生成に引数が必要なものに対応する場合はI/Fの検討が必要。
 void sqcTranspile(sqcQC* qcHandle, sqcTranspileKind kind, sqcTranspileOptions options);
@@ -251,8 +255,7 @@ void sqcTranspile(sqcQC* qcHandle, sqcTranspileKind kind, sqcTranspileOptions op
 ///   ・qiskit.compiler.transpileの関数オブジェクトの解放
 ///   ・Python C-API利用のためのPy_Finalizeの呼出し
 /// ```
-/// \retval 0 正常終了
-/// \retval それ以外 異常終了
+/// \retval E_SUCCESS Correctly END.
 ///
 /// \note sqcInitializeと同様に、プロセス内で１回しか呼び出せない。
 ///       プロセス内で複数回のPy_Finalizeを呼び出した場合、どういった状態となるかは未調査。

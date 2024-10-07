@@ -1,10 +1,10 @@
 /// \file
 /// qasm3を生成するAPI
 /// 
-/// \TODO エラー出力時にどのAPIで発生したか表示していない。
-/// \TODO ゲート系の関数について以下2行を記載
-/// \TODO 存在しないビット番号が指定されたかのチェックは実施していない。
-/// \TODO 操作を追加できない状態（MAX_N_GATES数を超える操作追加）かのチェックは実施していない。
+/// \todo エラー出力時にどのAPIで発生したか表示していない。
+/// \todo ゲート系の関数について以下2行を記載
+/// \todo 存在しないビット番号が指定されたかのチェックは実施していない。
+/// \todo 操作を追加できない状態（MAX_N_GATES数を超える操作追加）かのチェックは実施していない。
 
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
@@ -82,7 +82,7 @@ int sqcInitialize(void)
     Py_XDECREF(pyQiskitQasm3);
     Py_XDECREF(pyImportName);
 
-    return 0;
+    return E_SUCCESS;
 }
 
 sqcQC* sqcQuantumCircuit(int qubits)
@@ -192,7 +192,7 @@ void sqcSdgGate(sqcQC* qcHandle, int qubitNumber)
     qcHandle->ngates++;
 }
 
-/// \TODO Measureのオプションは実機のプロバイダーを調査して実装する予定
+/// \todo Measureのオプションは実機のプロバイダーを調査して実装する予定
 void sqcMeasure(sqcQC* qcHandle, int qubitNumber, int clbitNumber, sqcMeasureOptions options)
 {
     if(options != NULL){
@@ -208,50 +208,50 @@ void sqcMeasure(sqcQC* qcHandle, int qubitNumber, int clbitNumber, sqcMeasureOpt
     qcHandle->ngates++;
 }
 
-int sqcStoreQCtoMemory(sqcQC* qcHandle, void* address, size_t size, sqcStoreQCOptionKind kind)
+int sqcStoreQCtoMemory(sqcQC* qcHandle, void* address, size_t size)
 {
     if(qcHandle->pyTranspiledQuantumCircuit == NULL && qcHandle->ngates == 0){
-        switch(kind){
-            default:
-            case storeQCStop:
-                printf("This function is not available because there is no QuantumCircuit.\n"); exit(1);
-                break;
-            case storeQCContinue:
-                break; 
-            case storeQCContinueAndMessage:
-                printf("This function is not available because there is no QuantumCircuit.\n");
-                break;
-        }
+#ifdef DEBUG_ERROR_STOP     
+        printf("This function is not available because there is no QuantumCircuit.\n");
+        exit(1);
+#endif
+    }
+
+    if(address == NULL){
+        return E_NULL_POINTER;
     }
 
     size_t buflen;
     if(qcHandle->pyTranspiledQuantumCircuit != NULL){
 
-        // generate transpiled-QASM-string from Transpiled Circuit
         PyObject* pyTranspiledStr = PyObject_CallOneArg(mng->pyDumps, qcHandle->pyTranspiledQuantumCircuit);
         PyErr_Print();
         
-        // Python-string to C-string
-        if (pyTranspiledStr == NULL) {
-            return -1;
-        }
         const char* qasmStrTranspiled = PyUnicode_AsUTF8(pyTranspiledStr);
         PyErr_Print();
-        Py_XDECREF(pyTranspiledStr);
+        // Do not release pyTranspiledStr here, but release it when qasmStrTranspiled is finished being used
+        // PyObject(pyTranspiledStr), the generator, is not released until the end of string usage,
+        // in order to release its memory area on the PyObject side.
 
         buflen = strlen(qasmStrTranspiled)+1;
         if (size < buflen) {
-            // ユーザから渡されたバッファ長が短い場合はエラー復帰
-            return -1;
+            // Error return if buffer length passed by user is too short
+            memcpy(address, qasmStrTranspiled, size);
+            *((char*)address+size-1) = '\0';
+            Py_XDECREF(pyTranspiledStr);
+            return E_SHORTAGE_SIZE;
         }
         memcpy(address, qasmStrTranspiled, buflen);
+        Py_XDECREF(pyTranspiledStr);
     } else {
         char* tmpbuf = gateInfo2qasm(qcHandle);
         buflen = strlen(tmpbuf)+1;
         if (size < buflen) {
-            // ユーザから渡されたバッファ長が短い場合はエラー復帰
+            // Error return if buffer length passed by user is too short
+            memcpy(address, tmpbuf, size);
+            *((char*)address+size-1) = '\0';
             free(tmpbuf);
-            return -1;
+            return E_SHORTAGE_SIZE;
         }
         memcpy(address, tmpbuf, buflen);
         free(tmpbuf);
@@ -261,52 +261,41 @@ int sqcStoreQCtoMemory(sqcQC* qcHandle, void* address, size_t size, sqcStoreQCOp
 
 }
 
-int sqcStoreQC(sqcQC* qcHandle, FILE* file, sqcStoreQCOptionKind kind)
+int sqcStoreQC(sqcQC* qcHandle, FILE* file)
 {
-    if(qcHandle->pyTranspiledQuantumCircuit == NULL && qcHandle->ngates == 0){
-        switch(kind){
-            default:
-            case storeQCStop:
-                printf("This function is not available because there is no QuantumCircuit.\n"); exit(1);
-                break;
-            case storeQCContinue:
-                break; 
-            case storeQCContinueAndMessage:
-                printf("This function is not available because there is no QuantumCircuit.\n");
-                break;
-        }
+    if(qcHandle->pyTranspiledQuantumCircuit == NULL && qcHandle->ngates == 0){    
+#ifdef DEBUG_ERROR_STOP     
+        printf("This function is not available because there is no QuantumCircuit.\n");
+        exit(1);
+#endif
     }
     
     if (file == NULL) {
-        // ユーザから渡されたファイルハンドラがNULLの場合はエラー復帰
-        return -1;
+        // Error return if file handler passed by user is NULL.
+        return E_NULL_POINTER;
     }
-
-    int result;
 
     if(qcHandle->pyTranspiledQuantumCircuit != NULL){
 
-        // generate transpiled-QASM-string from Transpiled Circuit
         PyObject* pyTranspiledStr = PyObject_CallOneArg(mng->pyDumps, qcHandle->pyTranspiledQuantumCircuit);
         PyErr_Print();
         
-        // Python-string to C-string
-        if (pyTranspiledStr == NULL) {
-            return -1;
-        }
         const char* qasmStrTranspiled = PyUnicode_AsUTF8(pyTranspiledStr);
         PyErr_Print();
+        // Do not release pyTranspiledStr here, but release it when qasmStrTranspiled is finished being used
+        // PyObject(pyTranspiledStr), the generator, is not released until the end of string usage,
+        // in order to release its memory area on the PyObject side.
+        fputs(qasmStrTranspiled, file);
         Py_XDECREF(pyTranspiledStr);
-        result = fputs(qasmStrTranspiled, file);
 
     } else {
 
         char* tmpbuf = gateInfo2qasm(qcHandle);
-        result = fputs(tmpbuf, file);
+        fputs(tmpbuf, file);
         free(tmpbuf);
 
     }
-    return result;
+    return E_SUCCESS;
 }
 
 void sqcTranspile(sqcQC* qcHandle, sqcTranspileKind kind, sqcTranspileOptions options)
@@ -327,7 +316,7 @@ void sqcTranspile(sqcQC* qcHandle, sqcTranspileKind kind, sqcTranspileOptions op
         case Fake7QPulseV1:
         case Fake27QPulseV1:
         case Fake127QpulseV1:
-            /// \TODO デバッグ情報の出力に関しては要検討（ここに限らず）
+            /// \todo デバッグ情報の出力に関しては要検討（ここに限らず）
             printf("[ DEBUG ] The provider to use for transpilation : %s From %s  (optLevel=%d)\n",
                 providerInfo[kind][1],
                 providerInfo[kind][0],
@@ -338,10 +327,8 @@ void sqcTranspile(sqcQC* qcHandle, sqcTranspileKind kind, sqcTranspileOptions op
             break;
     }
 
-    // QASM-string from sqcQC*
     char* qasmStr = gateInfo2qasm(qcHandle);
 
-    // generate provider
     PyObject* pyImportName;
     pyImportName = PyUnicode_DecodeFSDefault(providerInfo[kind][0]);
     PyErr_Print();
@@ -355,11 +342,10 @@ void sqcTranspile(sqcQC* qcHandle, sqcTranspileKind kind, sqcTranspileOptions op
     Py_XDECREF(pyProviderFrom);
     Py_XDECREF(pyProviderClass);
 
-    // generate Circuit from QASM-string
     PyObject* pyTargetQASM = PyUnicode_DecodeFSDefault(qasmStr);
     PyErr_Print();
     PyObject* pyCircuit = PyObject_CallOneArg(mng->pyLoads, pyTargetQASM);
-    PyErr_Print(); 
+    PyErr_Print();
     free(qasmStr);
     Py_XDECREF(pyTargetQASM);
 
@@ -377,7 +363,7 @@ void sqcTranspile(sqcQC* qcHandle, sqcTranspileKind kind, sqcTranspileOptions op
     PyDict_SetItemString( pyDictArg, "optimization_level", pyOptLevel);
 
     qcHandle->pyTranspiledQuantumCircuit = PyObject_Call(mng->pyTranspiler, pyArgs, pyDictArg);
-    PyErr_Print(); 
+    PyErr_Print();
     Py_XDECREF(pyArgs);
     Py_XDECREF(pyCircuit);
     Py_XDECREF(pyDictArg);
@@ -393,7 +379,7 @@ int sqcFinalize(void)
     Py_Finalize();
     free(mng);
     mng = NULL;
-    return 0;
+    return E_SUCCESS;
 }
 
 /// \brief 量子回路IRからOpenQASM文字列を生成する内部関数
@@ -422,9 +408,9 @@ char* gateInfo2qasm(sqcQC* qcHandle)
 
     // 生成するQASM文字列用の領域を取得する
     // 取得するサイズは厳密でなく、mallocで指定する即値は以下のためのものである。
-    //    50：定型で出力するinclude, qubit, cbitなどのためのbyte数
+    //    100：定型で出力するinclude, qubit, cbitなどのためのbyte数
     //    64：１つのの操作に対するbyte数。量子回路IR数×64byteを確保
-    char* s = (char *)malloc((qcHandle->ngates)*64+50);
+    char* s = (char *)malloc((qcHandle->ngates)*64+100);
 
     sprintf(s, "OPENQASM 3.0;\ninclude \"stdgates.inc\";\nqubit[%d] q;\nbit[%d] c;\n",qcHandle->qubits,qcHandle->qubits);
     for(int i=0; i<qcHandle->ngates; i++){
