@@ -14937,14 +14937,14 @@ int main(int argc, char *argv[])
 
   FILE * IR_file = NULL;
   IR_file = fopen(__FILE__"_IR.txt", "w");
-  sqcStoreQC(q, IR_file, storeQCStop);
+  sqcStoreQC(q, IR_file);
   fclose(IR_file);
 
   sqcTranspile(q, KIND, &opt);
 
   FILE * Transpile_file = NULL;
   Transpile_file = fopen(__FILE__"_TP.txt", "w");
-  sqcStoreQC(q, Transpile_file, storeQCStop);
+  sqcStoreQC(q, Transpile_file);
   fclose(Transpile_file);
 
   sqcDestroyQuantumCircuit(q);
