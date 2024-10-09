@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
   sqcCXGate(qcir1, 0, 1);
 
   char* str = (char *)malloc(500);
-  int len = sqcStoreQCtoMemory(qcir1, str, 500, storeQCStop);
+  int len = sqcStoreQCtoMemory(qcir1, str, 500);
   if (len <= 0){
     printf("Buffer is short\n");
     free(str);
@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
   printf("-- return sqcStoreQCtoMemory before sqcTranspile (%d) --\n%s\n",len, str);
 
   sqcTranspile(qcir1, provider, &opt);
-  len = sqcStoreQCtoMemory(qcir1, str, 500, storeQCStop);
+  len = sqcStoreQCtoMemory(qcir1, str, 500);
    if (len <= 0){
     printf("Buffer is short\n");
     free(str);
@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
   sqcHGate(qcir2, 1);
   sqcCXGate(qcir2, 1, 0);
 
-  len = sqcStoreQCtoMemory(qcir2, str, 500, storeQCStop);
+  len = sqcStoreQCtoMemory(qcir2, str, 500);
   if (len <= 0){
     printf("Buffer is short\n");
     free(str);
@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
   printf("-- return sqcStoreQCtoMemory before sqcTranspile (%d) --\n%s\n",len, str);
 
   sqcTranspile(qcir2, provider, &opt);
-  len = sqcStoreQCtoMemory(qcir2, str, 500, storeQCStop);
+  len = sqcStoreQCtoMemory(qcir2, str, 500);
    if (len <= 0){
     printf("Buffer is short\n");
     free(str);
