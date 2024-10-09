@@ -1,9 +1,9 @@
-/// \file
-/// qasm3を生成するAPI
+/// \file sqc_api.h
+/// \brief API to generate qasm3
 
 #include <stdio.h>
 
-/// \brief sqcTranspileにてproviderを指定するenum
+/// \brief Enum specifying provider in sqcTranspile
 typedef enum {
   BasicSimulator,    ///< BasicSimulator
   FakeOpenPulse2Q,   ///< FakeOpenPulse2Q
@@ -14,47 +14,48 @@ typedef enum {
   Fake7QPulseV1,     ///< Fake7QPulseV1
   Fake27QPulseV1,    ///< Fake27QPulseV1
   Fake127QpulseV1,   ///< Fake127QpulseV1
-  NProviders        /// Number of provieders
+  NProviders        ///< Number of provieders
 } sqcTranspileKind;
 
-/// \brief トランスパイル時のオプションを指定するデータ構造
+/// \brief Data structure specifying options for transpiling
 typedef void* sqcTranspileOptions;
 
-/// \brief Fakeを先頭に持つプロバイダーを利用してトランスパイルする際のオプション
-/// \note 今は最適化レベルのみ指定できるようにしている。
-/// \todo 別のヘッダを用意するか検討
+/// \brief Options for transpiling using providers prefixed with Fake
+/// \note Now only the optimization level can be specified.
+/// \todo Consider providing a separate header
 typedef struct{
  int optLevel;
 } sqcFakeProviderOption;
 
-/// \brief sqcMeasureの時のオプションを指定するデータ構造
+/// \brief Data structure specifying options when sqcMeasure is used.
 typedef void* sqcMeasureOptions;
 
-/// \brief 量子回路のIRに保存できるゲート情報の数
+/// \brief Number of gate information that can be stored in the IR of a quantum circuit
 /// \note The maximum number of gates in the VQE-generated-dataset used in the test is 36500, so we have matched it.
 #define MAX_N_GATES 40000 
-/// \brief ゲートの整数パラメータの最大数
+/// \brief Maximum number of integer parameters for gate
 #define MAX_I_ARGS  2
-/// \brief ゲートの実数パラメータの最大数
+/// \brief Maximum number of real parameters of gate
 #define MAX_R_ARGS  1
 
-/// \brief ゲートなどの操作を表現する構造体
-/// \details 量子回路の１つのゲートなどの操作を表現する構造体。
-///          パラメータが何を意味するかは、操作ごとに設計する。
-///          例えば、id=CXGateの場合、
-///          niarg=2, rarg=0であり、iarg[0]が標的qubit番号、iarg[1]が制御qubit番号となっている。
+/// \brief Structures that represent gates and other operations
+/// \details A structure that represents a single gate or other operation of a quantum circuit.
+///          What the parameters mean is designed for each operation.
+///          For example, if id=CXGate,
+///          niarg=2, rarg=0, where iarg[0] is the target qubit number and iarg[1] is the control qubit number.
 typedef struct{
-  int    id;               ///< この操作の種別（enumGates）。HGateなど。
-  int    niarg;            ///< この操作の整数パラメータの数
-  int    nrarg;            ///< この操作の実数パラメータの数
-  int    iarg[MAX_I_ARGS]; ///< この操作の整数パラメータ
-  double rarg[MAX_R_ARGS]; ///< この操作の実数パラメータ
+  int    id;               ///< Type of this operation (enumGates). such as HGate.
+  int    niarg;            ///< Number of integer parameters for this operation
+  int    nrarg;            ///< Number of real parameters for this operation
+  int    iarg[MAX_I_ARGS]; ///< Integer parameter for this operation
+  double rarg[MAX_R_ARGS]; ///< Real parameters for this operation
 } gateInfo;
 
-/// \brief 量子回路のIRを表現する構造体
-/// \details 量子回路のIRを表現する構造体。
-/// \note 現時点では、ゲートなどの操作を表現する構造体領域をMAX_N_GATES数分確保しており、
-///       MAX_N_GATES以上の操作を保持することはできない。
+/// \brief Structures representing IRs in quantum circuits
+/// \details Structures representing IRs in quantum circuits
+/// \note
+/// - At present, the structure area for representing operations such as gates is reserved for the number of MAX_N_GATES,
+/// - It is not possible to hold more than MAX_N_GATES operations.
 typedef struct{
   // --- common parameters --- 
   int       qubits;
@@ -68,137 +69,136 @@ typedef struct{
 #define E_SUCCESS (0)
 
 
-/// \brief C-APIの利用開始を宣言する
-///
+/// \brief Declare the start of C-API usage
 /// ```
-///  本関数では以下を実施している。
-///   ・Python C-API利用のためのPy_Initializeの呼出し
-///   ・qiskit.qasm3.loadsの関数オブジェクトの保持
-///   ・qiskit.qasm3.dumpsの関数オブジェクトの保持
-///   ・qiskit.compiler.transpileの関数オブジェクトの保持
+/// This function performs the following.
+/// ・ Calling Py_Initialize for using Python C-API
+/// ・ Retention of function object of qiskit.qasm3.loads
+/// ・ Retention of function objects in qiskit.qasm3.dumps
+/// ・ Retention of function object in qiskit.compiler.transpile
 /// ```
 /// \retval E_SUCCESS Correctly END.
 ///
-/// \note Python C-APIのモジュールによっては
-///       プロセス内で複数回のPy_Initialize/Py_FinalizeがされるとPythonで例外が発生し、
-///       Python C-APIが正しい値を返さない場合がある。このため、sqcInitializeは
-///       プロセス内で１回しか呼び出せない制限とする。例外が発生する詳細な条件は未調査。
-/// \note 現時点では、IRのdumpおよび、IRのdump+transpileを複数回実行することを許している。
-///       このため、何度も使用するloads,dumps,transpielの関数オブジェクトを管理領域に
-///       保持することで、同じimportをしないようにしている。
+/// \note ・Some modules in the Python C-API
+///       Python raises an exception when Py_Initialize/Py_Finalize is done multiple times in a process,
+///       Python C-API may not return the correct value. For this reason, sqcInitialize should be
+///       The limitation is that it can only be called once in a process. The detailed conditions 
+///       under which the exception occurs have not yet been investigated.
+/// \note ・At this time, multiple executions of the IR dump and the IR dump + transpile are allowed.
+///       Therefore, by keeping the function objects of loads, dumps, and transpile that are used multiple times in the management area,
+///       we ensure that the same import is not performed.
 int sqcInitialize(void);
 
-/// \brief 量子回路IR領域の取得
-/// \details 量子回路IR領域を取得し、返却する。操作の追加などのAPIは、本APIが返却した値を用いる。
-///          qubit数と古典ビット数は同数であると想定する。
-/// \param [in] qubits 量子回路のqubit数
+/// \brief Obtaining the quantum circuit IR region
+/// \details Obtains and returns the quantum circuit IR region. APIs such as adding operations use the value returned by this API.
+///          The number of qubits and the number of classical bits are assumed to be the same.
+/// \param [in] qubits Number of qubits in a quantum circuit
 ///
-/// \retval NULL 異常終了
-/// \retval それ以外 量子回路IRのハンドラ（sqcQC*）
+/// \retval NULL ABEND
+/// \retval Other Handler of quantum circuit IR (sqcQC*)
 sqcQC* sqcQuantumCircuit(int qubits);
 
-/// \brief 量子回路IR領域の解放
-/// \param [in] qcHandle 量子回路IRのハンドラ
+/// \brief Quantum Circuit IR Region Release
+/// \param [in] qcHandle Handler of quantum circuit IR
 ///
-/// \return なし
+/// \return None
 void sqcDestroyQuantumCircuit(sqcQC* qcHandle);
 
-/// \brief 量子回路IRに h gateを追加する
-/// \param [out] qcHandle 量子回路IRのハンドラ
-/// \param [in] qubitNumber 対象のqubit番号
+/// \brief Add h gate to quantum circuit IR
+/// \param [out] qcHandle Handler of quantum circuit IR
+/// \param [in] qubitNumber Target qubit number
 ///
-/// \return なし
+/// \return None
 ///
 void sqcHGate(sqcQC* qcHandle, int qubitNumber);
 
-/// \brief 量子回路IRに cx gateを追加する
-/// \param [out] qcHandle 量子回路IRのハンドラ
-/// \param [in] qubitNumber1 制御ビット番号
-/// \param [in] qubitNumber2 標的ビット番号
+/// \brief Add cx gate to quantum circuit IR
+/// \param [out] qcHandle Handler of quantum circuit IR
+/// \param [in] qubitNumber1 control bit number
+/// \param [in] qubitNumber2 target bit number
 ///
-/// \return なし
+/// \return None
 ///
 void sqcCXGate(sqcQC* qcHandle, int qubitNumber1, int qubitNumber2);
 
-/// \brief 量子回路IRに cz gateを追加する
-/// \param [out] qcHandle 量子回路IRのハンドラ
-/// \param [in] qubitNumber1 制御ビット番号
-/// \param [in] qubitNumber2 標的ビット番号
+/// \brief Add cz gate to quantum circuit IR
+/// \param [out] qcHandle Handler of quantum circuit IR
+/// \param [in] qubitNumber1 control bit number
+/// \param [in] qubitNumber2 target bit number
 ///
-/// \return なし
+/// \return None
 ///
 void sqcCZGate(sqcQC* qcHandle, int qubitNumber1, int qubitNumber2);
 
-/// \brief 量子回路IRに rx gateを追加する
-/// \param [out] qcHandle 量子回路IRのハンドラ
-/// \param [in] theta 回転角
-/// \param [in] qubitNumber 標的ビット番号
+/// \brief Add rx gate to quantum circuit IR
+/// \param [out] qcHandle Handler for quantum circuit IR
+/// \param [in] theta Rotation angle
+/// \param [in] qubitNumber target bit number
 ///
-/// \return なし
+/// \return None
 ///
 void sqcRXGate(sqcQC* qcHandle, double theta, int qubitNumber);
 
-/// \brief 量子回路IRに ry gateを追加する
-/// \param [out] qcHandle 量子回路IRのハンドラ
-/// \param [in] theta 回転角
-/// \param [in] qubitNumber 標的ビット番号
+/// \brief Add ry gate to quantum circuit IR
+/// \param [out] qcHandle Handler for quantum circuit IR
+/// \param [in] theta Rotation angle
+/// \param [in] qubitNumber target bit number
 ///
-/// \return なし
+/// \return None
 ///
 void sqcRYGate(sqcQC* qcHandle, double theta, int qubitNumber);
 
-/// \brief 量子回路IRに rz gateを追加する
-/// \param [out] qcHandle 量子回路IRのハンドラ
-/// \param [in] phi 回転角
-/// \param [in] qubitNumber 標的ビット番号
+/// \brief Add rz gate to quantum circuit IR
+/// \param [out] qcHandle Handler for quantum circuit IR
+/// \param [in] phi rotation angle
+/// \param [in] qubitNumber target bit number
 ///
-/// \return なし
+/// \return None
 ///
 void sqcRZGate(sqcQC* qcHandle, double phi, int qubitNumber);
 
-/// \brief 量子回路IRに s gateを追加する
-/// \param [out] qcHandle 量子回路IRのハンドラ
-/// \param [in] qubitNumber 標的ビット番号
+/// \brief Add s gate to quantum circuit IR
+/// \param [out] qcHandle Handler for quantum circuit IR
+/// \param [in] qubitNumber Target bit number
 ///
-/// \return なし
+/// \return None
 ///
 void sqcSGate(sqcQC* qcHandle, int qubitNumber);
 
-/// \brief 量子回路IRに sdg gateを追加する
-/// \param [out] qcHandle 量子回路IRのハンドラ
-/// \param [in] qubitNumber 標的ビット番号
+/// \brief Add sdg gate to quantum circuit IR
+/// \param [out] qcHandle Handler for quantum circuit IR
+/// \param [in] qubitNumber target bit number
 ///
-/// \return なし
+/// \return None
 ///
 void sqcSdgGate(sqcQC* qcHandle, int qubitNumber);
 
-/// \brief 量子回路IRに x gateを追加する
-/// \param [out] qcHandle 量子回路IRのハンドラ
-/// \param [in] qubitNumber 標的ビット番号
+/// \brief Add x gate to quantum circuit IR
+/// \param [out] qcHandle Handler for quantum circuit IR
+/// \param [in] qubitNumber target bit number
 ///
-/// \return なし
+/// \return None
 ///
 void sqcXGate(sqcQC* qcHandle, int qubitNumber);
 
-/// \brief 量子回路IRに u1 gateを追加する
-/// \param [out] qcHandle 量子回路IRのハンドラ
-/// \param [in] lam 回転角
-/// \param [in] qubitNumber 標的ビット番号
+/// \brief Add u1 gate to quantum circuit IR
+/// \param [out] qcHandle Handler for quantum circuit IR
+/// \param [in] lam Rotation angle
+/// \param [in] qubitNumber Target bit number
 ///
-/// \return void
+/// \retval 0 Normal completion
+/// \retval other Abnormal end
 ///
 void sqcU1Gate(sqcQC* qcHandle, double lam, int qubitNumber);
 
-/// \brief 量子回路IRに Measureを追加する
-/// \param [out] qcHandle 量子回路IRのハンドラ
-/// \param [in] qubitNumber 測定する量子ビット番号
-/// \param [in] clbitNumber 古典ビット番号
-/// \param [in] options オプションを指示するためのデータ構造
+/// \brief Add Measure to quantum circuit IR
+/// \param [out] qcHandle Handler for quantum circuit IR
+/// \param [in] qubitNumber Quantum bit number to measure
+/// \param [in] clbitNumber classical bit number
+/// \param [in] options Data structure for specifying options
 ///
-/// \return なし
+/// \return None
 ///
-/// \todo 存在しないビット番号が指定されたかのチェックは実施していない。
-/// \todo 操作を追加できない状態（MAX_N_GATES数を超える操作追加）かのチェックは実施していない。
 void sqcMeasure(sqcQC* qcHandle, int qubitNumber, int clbitNumber, sqcMeasureOptions options);
 
 /// \brief Specified address is NULL of sqcStoreQC and sqcStoreQCtoMemory.
@@ -206,59 +206,62 @@ void sqcMeasure(sqcQC* qcHandle, int qubitNumber, int clbitNumber, sqcMeasureOpt
 /// \brief Shortage size to write OpenQASM string of sqcStoreQC and sqcStoreQCtoMemory.
 #define E_SHORTAGE_SIZE (-2)
 
-/// \brief 量子回路IRからOpenQASM文字列を生成しメモリに出力する
-/// \param [in] qcHandle 量子回路IRのハンドラ
-/// \param [out] address OpenQASM文字列を格納するバッファのポインタ
-/// \param [in] size バッファのサイズ
+/// \brief Generate OpenQASM string from quantum circuit IR and output to memory
+/// \param [in] qcHandle Handler of quantum circuit IR
+/// \param [out] address Pointer to buffer to store OpenQASM string
+/// \param [in] size Buffer Size
 ///
-/// \retval 正の値 正常終了。bufに格納したバイト数を返す。
+/// \retval Positive value Normal completion; the number of bytes stored in buf is returned.
 /// \retval E_NULL_POINTER Specified "address" is NULL.
 /// \retval E_SHORTAGE_SIZE Shortage size to write OpenQASM string.
-/// \note If there is no circuit that can output, the process continues.
-///       If "debug" is performed at build time, the program will exit with a message.
+/// \note 
+/// - If there is no circuit that can output, the process continues.
+/// - If "debug" is performed at build time, the program will exit with a message.
 int sqcStoreQCtoMemory(sqcQC* qcHandle, void* address, size_t size);
 
-/// \brief 量子回路IRからOpenQASM文字列を生成しファイルに出力する
-/// \param [in] qcHandle 量子回路IRのハンドラ
-/// \param [out] file 書き込み対象のファイルのハンドラ
+/// \brief Generate OpenQASM string from quantum circuit IR and output to file
+/// \param [in] qcHandle Handler of quantum circuit IR
+/// \param [out] file Handler of the file to be written
 ///
 /// \retval E_SUCCESS Correctly END.
 /// \retval E_NULL_POINTER Specified "file" is NULL.
-/// \note If there is no circuit that can output, the process continues.
-///       If "debug" is performed at build time, the program will exit with a message.
+/// \note 
+/// - If there is no circuit that can output, the process continues.
+/// - If "debug" is performed at build time, the program will exit with a message.
 int sqcStoreQC(sqcQC* qcHandle, FILE* file);
 
-/// \brief 量子回路IRをTranspileし、その回路情報をPyObject型で出力する
-/// \param [in] qcHandle 量子回路IRのハンドラ
-/// \param [in] kind Transpile対象のプロバイダ番号
-/// \param [in] options オプションを指示するためのデータ構造
+/// \brief Transpile a quantum circuit IR and output its circuit information in PyObject type
+/// \param [in] qcHandle Handler of quantum circuit IR
+/// \param [in] kind Transpile Target Provider Number
+/// \param [in] options Data structure for indicating options
 ///
-/// \return なし
+/// \return None
 /// 
-/// \note オプションを指定するには以下の作業を行う。
-///       1. 指定したいオプションを持つ構造体の変数を宣言する。
-///       2. 指定したいオプションの内容をその変数に代入する。
-///       3. sqcTranspiledOptions型の変数を上記の変数へのアドレスで初期化する。
-///       4. sqcTranspileの引数"options"にsqcTranspiledOptions型の変数を指定する。
+/// \note 
+/// - To specify options, do the following
+///       1. Declare a variable of the structure whose options you wish to specify.
+///       2. Assign the contents of the option to be specified to the variable.
+///       3. Initialize a variable of type sqcTranspiledOptions with the address to the above variable.
+///       4. Specify a variable of type sqcTranspiledOptions in the “options” argument of sqcTranspile.
 ///
-/// \todo 現時点では、transpileに指定可能なproviderは、providerInfoで定義されているもののみ。
-///       現在の設計はproviderのオブジェクトの生成に引数が不要な場合しか想定していないため、
-///       providerのオブジェクトの生成に引数が必要なものに対応する場合はI/Fの検討が必要。
+/// \note 
+/// - At present, the only providers that can be specified for transpile are those defined in providerInfo.
 void sqcTranspile(sqcQC* qcHandle, sqcTranspileKind kind, sqcTranspileOptions options);
 
-/// \brief C-APIの利用終了を宣言する
-///
+/// \brief Declare the end of C-API usage
+/// 
 /// ```
-///  本関数では以下を実施している。
-///   ・qiskit.qasm3.loadsの関数オブジェクトの解放
-///   ・qiskit.qasm3.dumpsの関数オブジェクトの解放
-///   ・qiskit.compiler.transpileの関数オブジェクトの解放
-///   ・Python C-API利用のためのPy_Finalizeの呼出し
+/// This function performs the following.
+/// ・ Release the function object of qiskit.qasm3.loads
+/// ・ Releasing the function object of qiskit.qasm3.dumps
+/// ・ Release of function object in qiskit.compiler.transpile
+/// ・ Calling Py_Finalize for Python C-API usage
 /// ```
 /// \retval E_SUCCESS Correctly END.
 ///
-/// \note sqcInitializeと同様に、プロセス内で１回しか呼び出せない。
-///       プロセス内で複数回のPy_Finalizeを呼び出した場合、どういった状態となるかは未調査。
+/// \note 
+/// - Like sqcInitialize, it can only be called once in a process.
+/// - It has not been investigated what happens if Py_Finalize is called multiple times in a process.
 int sqcFinalize(void);
 
 ////////////////////////////////
