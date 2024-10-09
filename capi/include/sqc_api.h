@@ -22,7 +22,6 @@ typedef void* sqcTranspileOptions;
 
 /// \brief Options for transpiling using providers prefixed with Fake
 /// \note Now only the optimization level can be specified.
-/// \todo Consider providing a separate header
 typedef struct{
  int optLevel;
 } sqcFakeProviderOption;

@@ -316,15 +316,14 @@ int sqcStoreQC(sqcQC* qcHandle, FILE* file)
     }
     return E_SUCCESS;
 }
-/// \todo
-///  The current design assumes only cases where arguments are not required for the generation of provider objects, 
-///  so I/F needs to be considered when supporting those that require arguments for the generation of provider objects.
+
 void sqcTranspile(sqcQC* qcHandle, sqcTranspileKind kind, sqcTranspileOptions options)
 {
     // If there is already a PyObject, release it
     Py_XDECREF(qcHandle->pyTranspiledQuantumCircuit);
     qcHandle->pyTranspiledQuantumCircuit = NULL;
 
+    // Checking for available providers.
     switch(kind){
         case BasicSimulator:
             printf("!!! unknown provider specified....\n"); exit(1);
@@ -337,7 +336,6 @@ void sqcTranspile(sqcQC* qcHandle, sqcTranspileKind kind, sqcTranspileOptions op
         case Fake7QPulseV1:
         case Fake27QPulseV1:
         case Fake127QpulseV1:
-            /// \todo Need to consider (not only here) regarding output of debugging information
             printf("[ DEBUG ] The provider to use for transpilation : %s From %s  (optLevel=%d)\n",
                 providerInfo[kind][1],
                 providerInfo[kind][0],
