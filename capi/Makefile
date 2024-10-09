@@ -1,12 +1,12 @@
 CC=gcc
 CFLAGS=-O2 -Wall -Wextra -fPIC
 
-# ローカル環境での実行オプション(サンプル)
-# PYLIB=-L /usr/lib/python3.10 -lpython3.10
-# PYINC=-I /usr/include/python3.10
+# Running options on Fugaku's login nodes
+# PY_PATH=/vol0004/apps/oss/spack-v0.21/opt/spack/linux-rhel8-cascadelake/gcc-13.2.0/python-3.11.6-yjlixq5gurvspzwveq6tfrqonplxu7m3
 
-# 富岳のログインノードでの実行オプション
-PY_PATH=/vol0004/apps/oss/spack-v0.21/opt/spack/linux-rhel8-cascadelake/gcc-13.2.0/python-3.11.6-yjlixq5gurvspzwveq6tfrqonplxu7m3
+# Running options on Fugaku's compute nodes
+PY_PATH=/vol0004/apps/oss/spack-v0.21/opt/spack/linux-rhel8-a64fx/gcc-13.2.0/python-3.11.6-7x2kdfqu57k7ej5hvkhbz6mjptpqhwuy
+
 PYLIB=-L $(PY_PATH)/lib -lpython3.11
 PYINC=-I $(PY_PATH)/include/python3.11
 
