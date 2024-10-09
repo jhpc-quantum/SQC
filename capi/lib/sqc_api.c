@@ -1,10 +1,11 @@
-/// \file
-/// qasm3を生成するAPI
+/// \file sqc_api.c
+/// \brief API to generate qasm3
 /// 
-/// \todo エラー出力時にどのAPIで発生したか表示していない。
-/// \todo ゲート系の関数について以下2行を記載
-/// \todo 存在しないビット番号が指定されたかのチェックは実施していない。
-/// \todo 操作を追加できない状態（MAX_N_GATES数を超える操作追加）かのチェックは実施していない。
+/// \note
+/// - When outputting an error, it does not indicate which API it occurred in.
+/// - Write the following two lines for gate functions.
+///   - No check if a nonexistent bit number is specified.
+///   - Do not check if an operation cannot be added (adding an operation that exceeds the number of MAX_N_GATES).
 
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
@@ -16,7 +17,7 @@
 
 static char* gateInfo2qasm(sqcQC* qcHandle);
 
-/// \brief enum sqcTranspileKindに対応するimport元とクラス名の定義
+/// \brief Definition of import source and class name corresponding to enum sqcTranspileKind
 static char* providerInfo[NProviders][2] = {
         { "qiskit.providers.basic_provider", "BasicSimulator" },
         { "qiskit.providers.fake_provider", "FakeOpenPulse2Q" },
@@ -29,7 +30,7 @@ static char* providerInfo[NProviders][2] = {
         { "qiskit.providers.fake_provider", "Fake127QPulseV1" }
 };
 
-/// \brief 量子回路IRでの操作を表すenum
+/// \brief enum representing operations in a quantum circuit IR
 enum enumGates{
     HGate,
     CXGate,
@@ -43,11 +44,11 @@ enum enumGates{
     NGates /// Number of gates
 };
 
-/// \brief C-API処理で使用する情報管理領域
+/// \brief Information management area used in C-API processing
 typedef struct{
-    PyObject* pyLoads;      ///< OpenQASM文字列をQiskitのcircuitオブジェクトに変換する関数の関数オブジェクト
-    PyObject* pyDumps;      ///< QiskitのcircuitオブジェクトをOpenQASM文字列に変換する関数の関数オブジェクト
-    PyObject* pyTranspiler; ///< Qiskitのトランスパイラを呼び出す関数の関数オブジェクト
+    PyObject* pyLoads;      ///< Function object of a function that converts an OpenQASM string into a Qiskit circuit object.
+    PyObject* pyDumps;      ///< Function object for a function that converts a Qiskit circuit object to an OpenQASM string.
+    PyObject* pyTranspiler; ///< Function object of a function that calls the Qiskit transpiler
 } mngArea;
 
 static mngArea* mng;
@@ -106,10 +107,10 @@ sqcQC* sqcQuantumCircuit(int qubits)
     return qcHandle;
 }
 
-// 回路情報のメモリ解放を行う
-// 回路情報は固定領域なため、qcHandleの解放と同時に解放される
-// トランスパイル結果のPyObjectの解放を行う
-// 引数のqcHandleの解放
+// Free the memory of the circuit information
+// Circuit information is a fixed area, so it is released at the same time as qcHandle is released
+// Release the PyObject of the transpile result
+// Release the qcHandle argument
 void sqcDestroyQuantumCircuit(sqcQC* qcHandle)
 {
     Py_XDECREF(qcHandle->pyTranspiledQuantumCircuit);
@@ -202,7 +203,7 @@ void sqcSdgGate(sqcQC* qcHandle, int qubitNumber)
     qcHandle->ngates++;
 }
 
-/// \todo Measureのオプションは実機のプロバイダーを調査して実装する予定
+/// \todo Measure option will be implemented after investigating the actual provider
 void sqcMeasure(sqcQC* qcHandle, int qubitNumber, int clbitNumber, sqcMeasureOptions options)
 {
     if(options != NULL){
@@ -322,6 +323,7 @@ void sqcTranspile(sqcQC* qcHandle, sqcTranspileKind kind, sqcTranspileOptions op
     Py_XDECREF(qcHandle->pyTranspiledQuantumCircuit);
     qcHandle->pyTranspiledQuantumCircuit = NULL;
 
+    // Checking for available providers.
     switch(kind){
         case BasicSimulator:
             printf("!!! unknown provider specified....\n"); exit(1);
@@ -334,7 +336,6 @@ void sqcTranspile(sqcQC* qcHandle, sqcTranspileKind kind, sqcTranspileOptions op
         case Fake7QPulseV1:
         case Fake27QPulseV1:
         case Fake127QpulseV1:
-            /// \todo デバッグ情報の出力に関しては要検討（ここに限らず）
             printf("[ DEBUG ] The provider to use for transpilation : %s From %s  (optLevel=%d)\n",
                 providerInfo[kind][1],
                 providerInfo[kind][0],
@@ -387,7 +388,7 @@ void sqcTranspile(sqcQC* qcHandle, sqcTranspileKind kind, sqcTranspileOptions op
     PyObject* pyDictArg = PyDict_New();
     PyDict_SetItemString( pyDictArg, "backend", pyProvider);
 
-    //現状はFakeProviderのみサポートしているため、それのオプションのみ指定している。
+    // Currently, only FakeProvider is supported, so only its options are specified.
     sqcFakeProviderOption* FakeOption = (sqcFakeProviderOption*)options;
     PyObject* pyOptLevel= PyLong_FromLong(FakeOption->optLevel);
     PyDict_SetItemString( pyDictArg, "optimization_level", pyOptLevel);
@@ -414,18 +415,19 @@ int sqcFinalize(void)
     return E_SUCCESS;
 }
 
-/// \brief 量子回路IRからOpenQASM文字列を生成する内部関数
-/// \details  量子回路IRからOpenQASM文字列を生成する際に使用する内部関数。
-///           C-APIのI/Fとして公開されない。
-///           量子回路IRのgate[n]を順に辿り、各操作に対応する文字列を連結する。
+/// \brief Internal function to generate OpenQASM string from quantum circuit IR
+/// \details  Internal function used to generate OpenQASM strings from quantum circuit IR.
+///           Not exposed as I/F of C-API.
+///           Traverses the gate[n] of the quantum circuit IR in sequence and 
+///           concatenates the strings corresponding to each operation.
 ///
-/// \param [in] qcHandle 量子回路IR
+/// \param [in] qcHandle quantum circuit IR
 ///
-/// \return OpenQASM文字列のポインタ
-///         この関数の出力であるOpenQASM文字列は動的メモリで管理しており、
-///         呼び出し側で解放しなければならない。
+/// \return Pointer to OpenQASM string
+///         The output of this function, an OpenQASM string, is managed in dynamic memory and must be freed by the caller,
+///         It must be freed by the caller.
 ///
-/// \note ほぼRCCSから提供されたままの仕組である。提供時以下のようにコメントされていた。
+/// \note The structure is almost exactly as provided by RCCS. The following comments were made at the time of provision.
 /// ```
 ///  * Translate our ir to qasm.
 ///  * This is a quick and dirty implementation for the reference.
@@ -438,10 +440,10 @@ char* gateInfo2qasm(sqcQC* qcHandle)
     char       t[256];
     gateInfo *g;
 
-    // 生成するQASM文字列用の領域を取得する
-    // 取得するサイズは厳密でなく、mallocで指定する即値は以下のためのものである。
-    //    100：定型で出力するinclude, qubit, cbitなどのためのbyte数
-    //    64：１つのの操作に対するbyte数。量子回路IR数×64byteを確保
+    // Obtain an area for the QASM string to be generated
+    // The size to be acquired is not strict, and the immediate value specified by malloc is for the following.
+    // 100: Number of bytes for include, qubit, cbit, etc. to be output by default.
+    // 64: Number of bytes for a single operation. Allocate 64 bytes for the number of quantum circuit IRs x 64 bytes.
     char* s = (char *)malloc((qcHandle->ngates)*64+100);
 
     sprintf(s, "OPENQASM 3.0;\ninclude \"stdgates.inc\";\nqubit[%d] q;\nbit[%d] c;\n",qcHandle->qubits,qcHandle->qubits);
