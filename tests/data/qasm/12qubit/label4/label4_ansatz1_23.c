@@ -17,7 +17,7 @@ sqcFakeProviderOption opt = {OPT_LEVEL};
 
 int main(int argc, char *argv[])
 {
-  sqcInitialize();
+  sqcInitialize(NULL, NULL);
 
   sqcQC* q;
   q = sqcQuantumCircuit(12);
