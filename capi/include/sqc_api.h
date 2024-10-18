@@ -3,6 +3,15 @@
 
 #include <stdio.h>
 
+/// \brief Unit of time to delay in sqcDelay and sqcDelayAll
+typedef enum{
+  UnitS, ///< second
+  UnitMS, ///< millisecond
+  UnitUS, ///< microsecond
+  UnitNS, ///< nanosecond
+  UnitDT ///< integer time unit depending on the target backend
+} sqcUnitKind;
+
 /// \brief Enum specifying provider in sqcTranspile
 typedef enum {
   BasicSimulator,    ///< BasicSimulator
@@ -189,10 +198,83 @@ void sqcXGate(sqcQC* qcHandle, int qubitNumber);
 /// \param [in] lam Rotation angle
 /// \param [in] qubitNumber Target bit number
 ///
-/// \retval 0 Normal completion
-/// \retval other Abnormal end
+/// \return None
 ///
 void sqcU1Gate(sqcQC* qcHandle, double lam, int qubitNumber);
+
+/// \brief Add ecr gate to quantum circuit IR
+/// \param [out] qcHandle Handler for quantum circuit IR
+/// \param [in] qubitNumber1 Target bit number1
+/// \param [in] qubitNumber2 Target bit number2
+///
+/// \return None
+///
+void sqcECRGate(sqcQC* qcHandle, int qubitNumber1, int qubitNumber2);
+
+/// \brief Add sx gate to quantum circuit IR
+/// \param [out] qcHandle Handler for quantum circuit IR
+/// \param [in] qubitNumber Target bit number
+///
+/// \return None
+///
+void sqcSXGate(sqcQC* qcHandle, int qubitNumber);
+
+/// \brief Add id gate to quantum circuit IR
+/// \param [out] qcHandle Handler for quantum circuit IR
+/// \param [in] qubitNumber Target bit number
+///
+/// \return None
+///
+void sqcIDGate(sqcQC* qcHandle, int qubitNumber);
+
+/// \brief Delays the operation of the qubit
+/// \param [out] qcHandle Handler for quantum circuit IR
+/// \param [in] duration Time to delay
+/// \param [in] unit Unit of time to delay
+/// \param [in] qubitNumber Target bit number
+///
+/// \return None
+///
+void sqcDelay(sqcQC* qcHandle, double duration, sqcUnitKind unit, int qubitNumber);
+
+/// \brief Delays the operation of all qubits
+/// \param [out] qcHandle Handler for quantum circuit IR
+/// \param [in] duration Time to delay
+/// \param [in] unit Unit of time to delay
+///
+/// \return None
+///
+void sqcDelayAll(sqcQC* qcHandle, double duration, sqcUnitKind unit);
+
+/// \brief Reset the qubit to default state.
+/// \param [out] qcHandle Handler for quantum circuit IR
+/// \param [in] qubitNumber Target bit number
+///
+/// \return None
+///
+void sqcReset(sqcQC* qcHandle, int qubitNumber);
+
+/// \brief Reset the All qubit to defalut state.
+/// \param [out] qcHandle Handler for quantum circuit IR
+///
+/// \return None
+///
+void sqcResetAll(sqcQC* qcHandle);
+
+/// \brief Apply Barrier to the qubit. 
+/// \param [out] qcHandle Handler for quantum circuit IR
+/// \param [in] qubitNumber Target bit number
+///
+/// \return None
+///
+void sqcBarrier(sqcQC* qcHandle, int qubitNumber);
+
+/// \brief Apply Barrier to all qubits.
+/// \param [out] qcHandle Handler for quantum circuit IR
+///
+/// \return None
+///
+void sqcBarrierAll(sqcQC* qcHandle);
 
 /// \brief Add Measure to quantum circuit IR
 /// \param [out] qcHandle Handler for quantum circuit IR

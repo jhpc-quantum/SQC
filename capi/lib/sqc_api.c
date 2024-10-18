@@ -40,9 +40,22 @@ enum enumGates{
     RZGate,
     SGate,
     SdgGate,
+    XGate,
+    U1Gate,
+    ECRGate,
+    SXGate,
+    IDGate,
+    Delay,
+    DelayAll,
+    Reset,
+    ResetAll,
+    Barrier,
+    BarrierAll,
     Measure,
     NGates /// Number of gates
 };
+
+#define PRECISION 20
 
 /// \brief Information management area used in C-API processing
 typedef struct{
@@ -201,6 +214,119 @@ void sqcSdgGate(sqcQC* qcHandle, int qubitNumber)
     qcHandle->gate[n].id      = SdgGate;
     qcHandle->gate[n].niarg   = 1;
     qcHandle->gate[n].iarg[0] = qubitNumber;
+    qcHandle->gate[n].nrarg   = 0;
+    qcHandle->ngates++;
+}
+
+void sqcXGate(sqcQC* qcHandle, int qubitNumber)
+{
+    int n =  qcHandle->ngates;
+    qcHandle->gate[n].id      = XGate;
+    qcHandle->gate[n].niarg   = 1;
+    qcHandle->gate[n].iarg[0] = qubitNumber;
+    qcHandle->gate[n].nrarg   = 0;
+    qcHandle->ngates++;
+}
+
+void sqcU1Gate(sqcQC* qcHandle, double lam, int qubitNumber)
+{
+    int n =  qcHandle->ngates;
+    qcHandle->gate[n].id      = U1Gate;
+    qcHandle->gate[n].niarg   = 1;
+    qcHandle->gate[n].iarg[0] = qubitNumber;
+    qcHandle->gate[n].nrarg   = 1;
+    qcHandle->gate[n].rarg[0] = lam;
+    qcHandle->ngates++;
+}
+
+void sqcECRGate(sqcQC* qcHandle, int qubitNumber1, int qubitNumber2)
+{
+    int n = qcHandle->ngates;
+    qcHandle->gate[n].id      = ECRGate;
+    qcHandle->gate[n].niarg   = 2;
+    qcHandle->gate[n].iarg[0] = qubitNumber1;
+    qcHandle->gate[n].iarg[1] = qubitNumber2;
+    qcHandle->gate[n].nrarg   = 0;
+    qcHandle->ngates++;
+}
+
+void sqcSXGate(sqcQC* qcHandle, int qubitNumber)
+{
+    int n =  qcHandle->ngates;
+    qcHandle->gate[n].id      = SXGate;
+    qcHandle->gate[n].niarg   = 1;
+    qcHandle->gate[n].iarg[0] = qubitNumber;
+    qcHandle->gate[n].nrarg   = 0;
+    qcHandle->ngates++;
+}
+
+void sqcIDGate(sqcQC* qcHandle, int qubitNumber)
+{
+    int n =  qcHandle->ngates;
+    qcHandle->gate[n].id      = IDGate;
+    qcHandle->gate[n].niarg   = 1;
+    qcHandle->gate[n].iarg[0] = qubitNumber;
+    qcHandle->gate[n].nrarg   = 0;
+    qcHandle->ngates++;
+}
+
+void sqcDelay(sqcQC* qcHandle, double duration, sqcUnitKind unit, int qubitNumber)
+{
+    int n =  qcHandle->ngates;
+    qcHandle->gate[n].id      = Delay;
+    qcHandle->gate[n].niarg   = 2;
+    qcHandle->gate[n].iarg[0] = (int)unit;
+    qcHandle->gate[n].iarg[1] = qubitNumber;
+    qcHandle->gate[n].nrarg   = 1;
+    qcHandle->gate[n].rarg[0] = duration;
+    qcHandle->ngates++;
+}
+
+void sqcDelayAll(sqcQC* qcHandle, double duration, sqcUnitKind unit)
+{
+    int n =  qcHandle->ngates;
+    qcHandle->gate[n].id      = DelayAll;
+    qcHandle->gate[n].niarg   = 1;
+    qcHandle->gate[n].iarg[0] = (int)unit;
+    qcHandle->gate[n].nrarg   = 1;
+    qcHandle->gate[n].rarg[0] = duration;
+    qcHandle->ngates++;
+}
+
+void sqcReset(sqcQC* qcHandle, int qubitNumber)
+{
+    int n =  qcHandle->ngates;
+    qcHandle->gate[n].id      = Reset;
+    qcHandle->gate[n].niarg   = 1;
+    qcHandle->gate[n].iarg[0] = qubitNumber;
+    qcHandle->gate[n].nrarg   = 0;
+    qcHandle->ngates++;
+}
+
+void sqcResetAll(sqcQC* qcHandle)
+{
+    int n =  qcHandle->ngates;
+    qcHandle->gate[n].id      = ResetAll;
+    qcHandle->gate[n].niarg   = 0;
+    qcHandle->gate[n].nrarg   = 0;
+    qcHandle->ngates++;
+}
+
+void sqcBarrier(sqcQC* qcHandle, int qubitNumber)
+{
+    int n =  qcHandle->ngates;
+    qcHandle->gate[n].id      = Barrier;
+    qcHandle->gate[n].niarg   = 1;
+    qcHandle->gate[n].iarg[0] = qubitNumber;
+    qcHandle->gate[n].nrarg   = 0;
+    qcHandle->ngates++;
+}
+
+void sqcBarrierAll(sqcQC* qcHandle)
+{
+    int n =  qcHandle->ngates;
+    qcHandle->gate[n].id      = BarrierAll;
+    qcHandle->gate[n].niarg   = 0;
     qcHandle->gate[n].nrarg   = 0;
     qcHandle->ngates++;
 }
@@ -439,14 +565,14 @@ int sqcFinalize(void)
 /// ```
 char* gateInfo2qasm(sqcQC* qcHandle)
 {
-    char       t[256];
+    char       t[512];
     gateInfo *g;
 
     // Obtain an area for the QASM string to be generated
     // The size to be acquired is not strict, and the immediate value specified by malloc is for the following.
     // 100: Number of bytes for include, qubit, cbit, etc. to be output by default.
     // 64: Number of bytes for a single operation. Allocate 64 bytes for the number of quantum circuit IRs x 64 bytes.
-    char* s = (char *)malloc((qcHandle->ngates)*64+100);
+    char* s = (char *)malloc((qcHandle->ngates)*64+1000);
 
     sprintf(s, "OPENQASM 3.0;\ninclude \"stdgates.inc\";\nqubit[%d] q;\nbit[%d] c;\n",qcHandle->qubits,qcHandle->qubits);
     for(int i=0; i<qcHandle->ngates; i++){
@@ -463,13 +589,13 @@ char* gateInfo2qasm(sqcQC* qcHandle)
                 sprintf(t, "cz q[%d], q[%d];\n",g->iarg[0], g->iarg[1]);
                 break;
             case RXGate:
-                sprintf(t, "rx(%.20f) q[%d];\n",g->rarg[0], g->iarg[0]);
+                sprintf(t, "rx(%.*f) q[%d];\n", PRECISION, g->rarg[0], g->iarg[0]);
                 break;
             case RYGate:
-                sprintf(t, "ry(%.20f) q[%d];\n",g->rarg[0], g->iarg[0]);
+                sprintf(t, "ry(%.*f) q[%d];\n", PRECISION, g->rarg[0], g->iarg[0]);
                 break;
             case RZGate:
-                sprintf(t, "rz(%.20f) q[%d];\n",g->rarg[0], g->iarg[0]);
+                sprintf(t, "rz(%.*f) q[%d];\n", PRECISION, g->rarg[0], g->iarg[0]);
                 break;
             case SGate:
                 sprintf(t, "s q[%d];\n", g->iarg[0]);
@@ -477,6 +603,90 @@ char* gateInfo2qasm(sqcQC* qcHandle)
             case SdgGate:
                 sprintf(t, "sdg q[%d];\n", g->iarg[0]);
                 break;
+            case XGate:
+                sprintf(t, "x q[%d];\n", g->iarg[0]);
+                break;
+            case U1Gate:
+                sprintf(t, "u1(%.*f) q[%d];\n", PRECISION, g->rarg[0], g->iarg[0]);
+                break;
+            case ECRGate:
+                sprintf(t, "gate rzx_138165359754352(_gate_p_0) _gate_q_0, _gate_q_1 {\n"
+                            "h _gate_q_1;\n"
+                            "cx _gate_q_0, _gate_q_1;\n"
+                            "rz(pi/4) _gate_q_1;\n"
+                            "cx _gate_q_0, _gate_q_1;\n"
+                            "h _gate_q_1;\n"
+                            "}\n"
+                            "gate rzx_138165359754400(_gate_p_0) _gate_q_0, _gate_q_1 {\n"
+                            "h _gate_q_1;\n"
+                            "cx _gate_q_0, _gate_q_1;\n"
+                            "rz(-pi/4) _gate_q_1;\n"
+                            "cx _gate_q_0, _gate_q_1;\n"
+                            "h _gate_q_1;\n"
+                            "}\n"
+                            "gate ecr _gate_q_0, _gate_q_1 {\n"
+                            "rzx_138165359754352(pi/4) _gate_q_0, _gate_q_1;\n"
+                            "x _gate_q_0;\n"
+                            "rzx_138165359754400(-pi/4) _gate_q_0, _gate_q_1;\n"
+                            "}\n"        
+                            "ecr q[%d], q[%d];\n", g->iarg[0], g->iarg[1]);
+                break;
+            case SXGate:
+                sprintf(t, "sx q[%d];\n", g->iarg[0]);
+                break;
+            case IDGate:
+                sprintf(t, "id q[%d];\n", g->iarg[0]);
+                break;  
+            case Delay:
+                switch((sqcUnitKind)g->iarg[0]){
+                    case UnitS:
+                        sprintf(t, "delay[%fs] q[%d];\n", g->rarg[0], g->iarg[1]);
+                        break;
+                    case UnitMS:
+                        sprintf(t, "delay[%fms] q[%d];\n", g->rarg[0], g->iarg[1]);
+                        break;
+                    case UnitUS:
+                        sprintf(t, "delay[%fus] q[%d];\n", g->rarg[0], g->iarg[1]);
+                        break;
+                    case UnitNS:
+                        sprintf(t, "delay[%fns] q[%d];\n", g->rarg[0], g->iarg[1]);
+                        break;
+                    case UnitDT:
+                        sprintf(t, "delay[%fdt] q[%d];\n", g->rarg[0], g->iarg[1]);
+                        break;
+                }
+                break; 
+            case DelayAll:
+                switch((sqcUnitKind)g->iarg[0]){
+                    case UnitS:
+                        sprintf(t, "delay[%fs] q;\n", g->rarg[0]);
+                        break;
+                    case UnitMS:
+                        sprintf(t, "delay[%fms] q;\n", g->rarg[0]);
+                        break;
+                    case UnitUS:
+                        sprintf(t, "delay[%fus] q;\n", g->rarg[0]);
+                        break;
+                    case UnitNS:
+                        sprintf(t, "delay[%fns] q;\n", g->rarg[0]);
+                        break;
+                    case UnitDT:
+                        sprintf(t, "delay[%fdt] q;\n", g->rarg[0]);
+                        break;
+                }
+                break; 
+            case Reset:
+                sprintf(t, "reset q[%d];\n", g->iarg[0]);
+                break;
+            case ResetAll:
+                sprintf(t, "reset q;\n");
+                break;
+            case Barrier:
+                sprintf(t, "barrier q[%d];\n", g->iarg[0]);
+                break;
+            case BarrierAll:
+                sprintf(t, "barrier q;\n");
+                break; 
             case Measure:
                 sprintf(t, "c[%d] = measure q[%d];\n",g->iarg[1], g->iarg[0]);
                 break;
