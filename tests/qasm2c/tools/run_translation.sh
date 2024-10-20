@@ -8,9 +8,9 @@ PARALLEL_JOBS=10
 
 function toQASM() {
     # Set the include path
-    INCLUDE_PATH="../../capi/include"
+    INCLUDE_PATH="../../../capi/include"
     # Set the library path
-    LIBRARY_PATH="../../capi/build"
+    LIBRARY_PATH="../../../capi/build"
     # Set the name of the library to use
     LIBRARY_NAME="sqc_api"
     # Set the compiler options
