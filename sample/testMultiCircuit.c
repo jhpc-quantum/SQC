@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
   sqcTranspileKind provider = Fake20QV1;
   sqcFakeProviderOption opt = {1};
 
-  sqcInitialize(); 
+  sqcInitialize(NULL, NULL); 
 
   sqcQC* qcir1;
   qcir1 = sqcQuantumCircuit(qubits);

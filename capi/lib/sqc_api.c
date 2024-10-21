@@ -53,8 +53,10 @@ typedef struct{
 
 static mngArea* mng;
 
-int sqcInitialize(void)
+int sqcInitialize(char* channel, char* token)
 {
+    (void)channel;
+    (void)token;
     mng = (mngArea*)malloc(sizeof(mngArea));
 
     Py_Initialize(); // only be initialized once per interpreter process

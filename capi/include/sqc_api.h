@@ -76,6 +76,9 @@ typedef struct{
 /// ・ Retention of function objects in qiskit.qasm3.dumps
 /// ・ Retention of function object in qiskit.compiler.transpile
 /// ```
+///
+/// \param [in] channel Channel type.
+/// \param [in] token API token.
 /// \retval E_SUCCESS Correctly END.
 ///
 /// \note ・Some modules in the Python C-API
@@ -86,7 +89,8 @@ typedef struct{
 /// \note ・At this time, multiple executions of the IR dump and the IR dump + transpile are allowed.
 ///       Therefore, by keeping the function objects of loads, dumps, and transpile that are used multiple times in the management area,
 ///       we ensure that the same import is not performed.
-int sqcInitialize(void);
+/// \note ・Arguments currently unused.
+int sqcInitialize(char* channel, char* token);
 
 /// \brief Obtaining the quantum circuit IR region
 /// \details Obtains and returns the quantum circuit IR region. APIs such as adding operations use the value returned by this API.
