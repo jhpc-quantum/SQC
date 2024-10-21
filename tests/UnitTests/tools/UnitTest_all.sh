@@ -1,7 +1,7 @@
 #!/bin/bash
 chmod +x UnitTest*.sh
 
-total_tests=21
+total_tests=37
 success_count=0 
 
 for i in $(seq -w 1 $total_tests); do

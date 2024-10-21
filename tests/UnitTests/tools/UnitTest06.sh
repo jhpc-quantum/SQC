@@ -16,13 +16,13 @@ COMMON="$CFLAGS_ALL -I $INCLUDE_PATH $SOURCE_FILE -L$LIBRARY_PATH -l$LIBRARY_NAM
 
 # Answer file
 expected_error_file="../answer/UnitTest06.log"
-# BASIC or FAKE or NONE
+# Specifying a provider
 PROVIDER_FLAGS="-D FAKE"
 # To transpile or not
 TRANSPILE_FRAGS="-D ON_TRANSPILE"
 # Whether to write the circuit to memory
 MEMORY_FLAGS="-D MEMORY"
-# 
+# Memory address is NULL
 MEMORY_NULL_FLAGS="-D MEMORYADDRESS_NULL"
 
 gcc $COMMON $MEMORY_NULL_FLAGS $MEMORY_FLAGS  $PROVIDER_FLAGS $TRANSPILE_FRAGS -o "$CIRCUIT_OUT"

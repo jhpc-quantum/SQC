@@ -15,7 +15,7 @@ SOURCE_FILE="$SRC_DIR/$FILENAME.c"
 CIRCUIT_OUT="../../../capi/build/UnitTest12.o"
 COMMON="$CFLAGS_ALL -I $INCLUDE_PATH $SOURCE_FILE -L$LIBRARY_PATH -l$LIBRARY_NAME"
 
-# BASIC or FAKE or NONE
+# Specifying a provider
 PROVIDER_FLAGS="-D FAKE"
 # Whether to write the circuit to memory
 MEMORY_FLAGS="-D MEMORY"

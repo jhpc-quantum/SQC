@@ -15,7 +15,7 @@ COMMON="$CFLAGS_ALL -I $INCLUDE_PATH $SOURCE_FILE -L$LIBRARY_PATH -l$LIBRARY_NAM
 
 # expectederrorfile
 expected_error_file="../answer/UnitTest20.log"
-# BASIC or FAKE or NONE
+# Specifying a provider
 PROVIDER_FLAGS="-D FAKE"
 
 gcc $COMMON  $PROVIDER_FLAGS -o "$CIRCUIT_OUT"
