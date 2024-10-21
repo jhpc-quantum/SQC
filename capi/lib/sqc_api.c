@@ -31,7 +31,9 @@ static char* providerInfo[NProviders][2] = {
 };
 
 /// \brief enum representing operations in a quantum circuit IR
+/// \note Lines 37 to 49 are enum of gate, line 51 to 57 are enum of non-gate operation.
 enum enumGates{
+    // Gate definition
     HGate,
     CXGate,
     CZGate,
@@ -45,6 +47,7 @@ enum enumGates{
     ECRGate,
     SXGate,
     IDGate,
+    // Non-gate operation definition
     Delay,
     DelayAll,
     Reset,
@@ -567,17 +570,19 @@ char* gateInfo2qasm(sqcQC* qcHandle)
 {
     char       t[512];
     gateInfo *g;
+    unsigned int useECRGate = 0;
 
     // Obtain an area for the QASM string to be generated
     // The size to be acquired is not strict, and the immediate value specified by malloc is for the following.
     // 100: Number of bytes for include, qubit, cbit, etc. to be output by default.
+    // 500: Number of bytes for definition of ECR gate.
     // 64: Number of bytes for a single operation. Allocate 64 bytes for the number of quantum circuit IRs x 64 bytes.
-    char* s = (char *)malloc((qcHandle->ngates)*64+1000);
+    char* s = (char *)malloc((qcHandle->ngates)*64+100+500);
 
     sprintf(s, "OPENQASM 3.0;\ninclude \"stdgates.inc\";\nqubit[%d] q;\nbit[%d] c;\n",qcHandle->qubits,qcHandle->qubits);
     for(int i=0; i<qcHandle->ngates; i++){
         g = &(qcHandle->gate[i]);
-        memset(t, 0, sizeof(char)*256);
+        t[0] = 0;
         switch(g->id){
             case HGate:
                 sprintf(t, "h q[%d];\n", g->iarg[0]);
@@ -610,14 +615,15 @@ char* gateInfo2qasm(sqcQC* qcHandle)
                 sprintf(t, "u1(%.*f) q[%d];\n", PRECISION, g->rarg[0], g->iarg[0]);
                 break;
             case ECRGate:
-                sprintf(t, "gate rzx_138165359754352(_gate_p_0) _gate_q_0, _gate_q_1 {\n"
+                if(useECRGate == 0){
+                    sprintf(t, "gate rzx_1(_gate_p_0) _gate_q_0, _gate_q_1 {\n"
                             "h _gate_q_1;\n"
                             "cx _gate_q_0, _gate_q_1;\n"
                             "rz(pi/4) _gate_q_1;\n"
                             "cx _gate_q_0, _gate_q_1;\n"
                             "h _gate_q_1;\n"
                             "}\n"
-                            "gate rzx_138165359754400(_gate_p_0) _gate_q_0, _gate_q_1 {\n"
+                            "gate rzx_2(_gate_p_0) _gate_q_0, _gate_q_1 {\n"
                             "h _gate_q_1;\n"
                             "cx _gate_q_0, _gate_q_1;\n"
                             "rz(-pi/4) _gate_q_1;\n"
@@ -625,11 +631,14 @@ char* gateInfo2qasm(sqcQC* qcHandle)
                             "h _gate_q_1;\n"
                             "}\n"
                             "gate ecr _gate_q_0, _gate_q_1 {\n"
-                            "rzx_138165359754352(pi/4) _gate_q_0, _gate_q_1;\n"
+                            "rzx_1(pi/4) _gate_q_0, _gate_q_1;\n"
                             "x _gate_q_0;\n"
-                            "rzx_138165359754400(-pi/4) _gate_q_0, _gate_q_1;\n"
-                            "}\n"        
-                            "ecr q[%d], q[%d];\n", g->iarg[0], g->iarg[1]);
+                            "rzx_2(-pi/4) _gate_q_0, _gate_q_1;\n"
+                            "}\n");
+                    useECRGate++;
+                    strcat(s, t);     
+                }
+                sprintf(t, "ecr q[%d], q[%d];\n", g->iarg[0], g->iarg[1]);
                 break;
             case SXGate:
                 sprintf(t, "sx q[%d];\n", g->iarg[0]);
@@ -638,41 +647,31 @@ char* gateInfo2qasm(sqcQC* qcHandle)
                 sprintf(t, "id q[%d];\n", g->iarg[0]);
                 break;  
             case Delay:
-                switch((sqcUnitKind)g->iarg[0]){
-                    case UnitS:
-                        sprintf(t, "delay[%fs] q[%d];\n", g->rarg[0], g->iarg[1]);
-                        break;
-                    case UnitMS:
-                        sprintf(t, "delay[%fms] q[%d];\n", g->rarg[0], g->iarg[1]);
-                        break;
-                    case UnitUS:
-                        sprintf(t, "delay[%fus] q[%d];\n", g->rarg[0], g->iarg[1]);
-                        break;
-                    case UnitNS:
-                        sprintf(t, "delay[%fns] q[%d];\n", g->rarg[0], g->iarg[1]);
-                        break;
-                    case UnitDT:
-                        sprintf(t, "delay[%fdt] q[%d];\n", g->rarg[0], g->iarg[1]);
-                        break;
-                }
-                break; 
             case DelayAll:
-                switch((sqcUnitKind)g->iarg[0]){
-                    case UnitS:
-                        sprintf(t, "delay[%fs] q;\n", g->rarg[0]);
-                        break;
-                    case UnitMS:
-                        sprintf(t, "delay[%fms] q;\n", g->rarg[0]);
-                        break;
-                    case UnitUS:
-                        sprintf(t, "delay[%fus] q;\n", g->rarg[0]);
-                        break;
-                    case UnitNS:
-                        sprintf(t, "delay[%fns] q;\n", g->rarg[0]);
-                        break;
-                    case UnitDT:
-                        sprintf(t, "delay[%fdt] q;\n", g->rarg[0]);
-                        break;
+                {
+                    char qubitNumberString[20];
+                    if(g->id == Delay){
+                        sprintf(qubitNumberString, "[%d];", g->iarg[1]);
+                    } else {
+                        sprintf(qubitNumberString, ";");
+                    }
+                    switch((sqcUnitKind)g->iarg[0]){
+                        case UnitS:
+                            sprintf(t, "delay[%fs] q%s\n", g->rarg[0], qubitNumberString);
+                            break;
+                        case UnitMS:
+                            sprintf(t, "delay[%fms] q%s\n", g->rarg[0], qubitNumberString);
+                            break;
+                        case UnitUS:
+                            sprintf(t, "delay[%fus] q%s\n", g->rarg[0], qubitNumberString);
+                            break;
+                        case UnitNS:
+                            sprintf(t, "delay[%fns] q%s\n", g->rarg[0], qubitNumberString);
+                            break;
+                        case UnitDT:
+                            sprintf(t, "delay[%fdt] q%s\n", g->rarg[0], qubitNumberString);
+                            break;
+                    }
                 }
                 break; 
             case Reset:
