@@ -1,0 +1,251 @@
+#include "sqc_api.h"
+#include <stdlib.h>
+#include <string.h>
+
+#if defined(FAKE_PROVIDER) 
+#define KIND (Fake20QV1)
+#ifndef OPT_LEVEL
+sqcFakeProviderOption opt = {0};
+#else
+sqcFakeProviderOption opt = {OPT_LEVEL};
+#endif
+#elif defined(IBM_PROVIDER)
+#fatal /* Not Implemented */
+#else /* other */
+#fatal 
+#endif
+
+int main(int argc, char *argv[])
+{
+  sqcInitialize(NULL, NULL);
+
+  sqcQC* q;
+  q = sqcQuantumCircuit(12);
+
+  sqcRYGate(q, -0.3893850768425284, 0);
+  sqcRYGate(q, 1.073914519862147, 1);
+  sqcCXGate(q, 0, 1);
+  sqcRYGate(q, -2.6298739812717358, 0);
+  sqcRYGate(q, 1.1189467341249115, 1);
+  sqcCXGate(q, 0, 1);
+  sqcRYGate(q, -2.22294586276809, 1);
+  sqcRYGate(q, -2.2577580241746817, 2);
+  sqcCXGate(q, 1, 2);
+  sqcRYGate(q, -1.4988254851609781, 1);
+  sqcRYGate(q, 1.3718349967964185, 2);
+  sqcCXGate(q, 1, 2);
+  sqcRYGate(q, -0.47259783024840873, 2);
+  sqcRYGate(q, -0.021448812508723818, 3);
+  sqcCXGate(q, 2, 3);
+  sqcRYGate(q, 2.7581293692951285, 2);
+  sqcRYGate(q, 1.3630876146266928, 3);
+  sqcCXGate(q, 2, 3);
+  sqcRYGate(q, 0.3030782017463743, 3);
+  sqcRYGate(q, -1.1203742515585162, 4);
+  sqcCXGate(q, 3, 4);
+  sqcRYGate(q, -2.1494750708711585, 3);
+  sqcRYGate(q, -2.0606037924924685, 4);
+  sqcCXGate(q, 3, 4);
+  sqcRYGate(q, -0.28808097992213144, 4);
+  sqcRYGate(q, -1.2468258140633193, 5);
+  sqcCXGate(q, 4, 5);
+  sqcRYGate(q, 1.8096240916209236, 4);
+  sqcRYGate(q, -0.7593401218686342, 5);
+  sqcCXGate(q, 4, 5);
+  sqcRYGate(q, 0.6692386780490143, 5);
+  sqcRYGate(q, -0.544550686529603, 6);
+  sqcCXGate(q, 5, 6);
+  sqcRYGate(q, 2.896470353485718, 5);
+  sqcRYGate(q, 0.7516657178715578, 6);
+  sqcCXGate(q, 5, 6);
+  sqcRYGate(q, 1.4899559095806314, 6);
+  sqcRYGate(q, -3.0753597821195635, 7);
+  sqcCXGate(q, 6, 7);
+  sqcRYGate(q, 1.9748414284289728, 6);
+  sqcRYGate(q, -1.708874005562076, 7);
+  sqcCXGate(q, 6, 7);
+  sqcRYGate(q, 0.4937551344929986, 7);
+  sqcRYGate(q, -0.28215217145305976, 8);
+  sqcCXGate(q, 7, 8);
+  sqcRYGate(q, -0.11063778906334232, 7);
+  sqcRYGate(q, -0.6028697901355102, 8);
+  sqcCXGate(q, 7, 8);
+  sqcRYGate(q, 0.22981641218451881, 8);
+  sqcRYGate(q, -1.2588876657455195, 9);
+  sqcCXGate(q, 8, 9);
+  sqcRYGate(q, 2.868403034316664, 8);
+  sqcRYGate(q, 2.1782847438674215, 9);
+  sqcCXGate(q, 8, 9);
+  sqcRYGate(q, 1.0015508967507087, 9);
+  sqcRYGate(q, 2.192429063772342, 10);
+  sqcCXGate(q, 9, 10);
+  sqcRYGate(q, -2.8264532088039904, 9);
+  sqcRYGate(q, -1.9712435746293178, 10);
+  sqcCXGate(q, 9, 10);
+  sqcRYGate(q, -1.988573145695919, 10);
+  sqcRYGate(q, -1.4971257116819212, 11);
+  sqcCXGate(q, 10, 11);
+  sqcRYGate(q, 1.5489548495243424, 10);
+  sqcRYGate(q, -3.051186971885079, 11);
+  sqcCXGate(q, 10, 11);
+  sqcRYGate(q, 1.288878369838022, 0);
+  sqcRYGate(q, 1.6855078951853273, 1);
+  sqcCXGate(q, 0, 1);
+  sqcRYGate(q, 1.2439309757425443, 0);
+  sqcRYGate(q, -2.032667078556986, 1);
+  sqcCXGate(q, 0, 1);
+  sqcRYGate(q, 1.772640888201658, 1);
+  sqcRYGate(q, -2.575173473257587, 2);
+  sqcCXGate(q, 1, 2);
+  sqcRYGate(q, -2.5834581400589696, 1);
+  sqcRYGate(q, 0.10519492299903127, 2);
+  sqcCXGate(q, 1, 2);
+  sqcRYGate(q, 1.362227681938299, 2);
+  sqcRYGate(q, -2.534616404652962, 3);
+  sqcCXGate(q, 2, 3);
+  sqcRYGate(q, -0.07698791451073816, 2);
+  sqcRYGate(q, -2.3951382478041676, 3);
+  sqcCXGate(q, 2, 3);
+  sqcRYGate(q, 2.793710647467173, 3);
+  sqcRYGate(q, -1.42920666156171, 4);
+  sqcCXGate(q, 3, 4);
+  sqcRYGate(q, 1.960784294516427, 3);
+  sqcRYGate(q, -0.43834150570261077, 4);
+  sqcCXGate(q, 3, 4);
+  sqcRYGate(q, 1.2306526492358225, 4);
+  sqcRYGate(q, -1.7216147102110553, 5);
+  sqcCXGate(q, 4, 5);
+  sqcRYGate(q, 0.13483717682477536, 4);
+  sqcRYGate(q, -1.245113552130792, 5);
+  sqcCXGate(q, 4, 5);
+  sqcRYGate(q, -1.8622029721098667, 5);
+  sqcRYGate(q, -0.36501496932345867, 6);
+  sqcCXGate(q, 5, 6);
+  sqcRYGate(q, 0.06063756273107548, 5);
+  sqcRYGate(q, 2.9867597805723034, 6);
+  sqcCXGate(q, 5, 6);
+  sqcRYGate(q, 0.8306950074607267, 6);
+  sqcRYGate(q, 1.402405492102929, 7);
+  sqcCXGate(q, 6, 7);
+  sqcRYGate(q, -2.432430470168411, 6);
+  sqcRYGate(q, -0.7797923533889117, 7);
+  sqcCXGate(q, 6, 7);
+  sqcRYGate(q, 1.7469957330603612, 7);
+  sqcRYGate(q, -1.5828608767623944, 8);
+  sqcCXGate(q, 7, 8);
+  sqcRYGate(q, -0.7325532837220754, 7);
+  sqcRYGate(q, -0.1941604620990406, 8);
+  sqcCXGate(q, 7, 8);
+  sqcRYGate(q, -1.3853391618254125, 8);
+  sqcRYGate(q, 1.586861534541789, 9);
+  sqcCXGate(q, 8, 9);
+  sqcRYGate(q, -1.0651863008116562, 8);
+  sqcRYGate(q, -2.5455407102593557, 9);
+  sqcCXGate(q, 8, 9);
+  sqcRYGate(q, -1.4121467718371346, 9);
+  sqcRYGate(q, -0.6254573809554131, 10);
+  sqcCXGate(q, 9, 10);
+  sqcRYGate(q, 1.0783177506341586, 9);
+  sqcRYGate(q, -1.2439377195175678, 10);
+  sqcCXGate(q, 9, 10);
+  sqcRYGate(q, -1.3854732000638728, 10);
+  sqcRYGate(q, 0.21140440551410045, 11);
+  sqcCXGate(q, 10, 11);
+  sqcRYGate(q, -1.0826450088802657, 10);
+  sqcRYGate(q, 0.23047613590374352, 11);
+  sqcCXGate(q, 10, 11);
+  sqcRYGate(q, 2.2003920359089535, 0);
+  sqcRYGate(q, 0.724352647054704, 1);
+  sqcCXGate(q, 0, 1);
+  sqcRYGate(q, 1.573573593705928, 0);
+  sqcRYGate(q, -3.114324726868065, 1);
+  sqcCXGate(q, 0, 1);
+  sqcRYGate(q, -1.5774758515077432, 1);
+  sqcRYGate(q, -1.4260227351821229, 2);
+  sqcCXGate(q, 1, 2);
+  sqcRYGate(q, -1.5740189732463525, 1);
+  sqcRYGate(q, -2.9815157729434403, 2);
+  sqcCXGate(q, 1, 2);
+  sqcRYGate(q, 1.570585627270951, 2);
+  sqcRYGate(q, -1.5298236497360218, 3);
+  sqcCXGate(q, 2, 3);
+  sqcRYGate(q, 1.572812202304912, 2);
+  sqcRYGate(q, 0.8136320099913483, 3);
+  sqcCXGate(q, 2, 3);
+  sqcRYGate(q, 2.7496094495642067, 3);
+  sqcRYGate(q, -1.53638559480041, 4);
+  sqcCXGate(q, 3, 4);
+  sqcRYGate(q, -1.5680469505510297, 3);
+  sqcRYGate(q, 0.0009897892300205768, 4);
+  sqcCXGate(q, 3, 4);
+  sqcRYGate(q, -1.5712612135617032, 4);
+  sqcRYGate(q, -2.1319078059503296, 5);
+  sqcCXGate(q, 4, 5);
+  sqcRYGate(q, 1.5724558756266402, 4);
+  sqcRYGate(q, -1.8884990546746012, 5);
+  sqcCXGate(q, 4, 5);
+  sqcRYGate(q, 1.59573196850077, 5);
+  sqcRYGate(q, -1.7153967084037092, 6);
+  sqcCXGate(q, 5, 6);
+  sqcRYGate(q, 1.5729459880968748, 5);
+  sqcRYGate(q, 3.0384104234193523, 6);
+  sqcCXGate(q, 5, 6);
+  sqcRYGate(q, 1.5709996959578425, 6);
+  sqcRYGate(q, 1.0888225815320418, 7);
+  sqcCXGate(q, 6, 7);
+  sqcRYGate(q, -1.5719587855248793, 6);
+  sqcRYGate(q, 2.07113819855348, 7);
+  sqcCXGate(q, 6, 7);
+  sqcRYGate(q, 1.567168537325166, 7);
+  sqcRYGate(q, 1.4483696052642772, 8);
+  sqcCXGate(q, 7, 8);
+  sqcRYGate(q, -1.570022724703989, 7);
+  sqcRYGate(q, -2.9692864523022786, 8);
+  sqcCXGate(q, 7, 8);
+  sqcRYGate(q, 0.41453555432343975, 8);
+  sqcRYGate(q, 2.0220668139834928, 9);
+  sqcCXGate(q, 8, 9);
+  sqcRYGate(q, -1.5711072246755202, 8);
+  sqcRYGate(q, -3.141481543140852, 9);
+  sqcCXGate(q, 8, 9);
+  sqcRYGate(q, 1.570123238099318, 9);
+  sqcRYGate(q, -1.9855919021220632, 10);
+  sqcCXGate(q, 9, 10);
+  sqcRYGate(q, -1.5707978503551034, 9);
+  sqcRYGate(q, -1.9004935012300934, 10);
+  sqcCXGate(q, 9, 10);
+  sqcRYGate(q, -1.5682073183212424, 10);
+  sqcRYGate(q, 0.5228065821915733, 11);
+  sqcCXGate(q, 10, 11);
+  sqcRYGate(q, -1.572555800340191, 10);
+  sqcRYGate(q, 0.571826388484542, 11);
+  sqcCXGate(q, 10, 11);
+  sqcRYGate(q, -1.6356064617366481, 0);
+  sqcRYGate(q, -1.5802684634258872, 1);
+  sqcRYGate(q, 1.566423056861451, 2);
+  sqcRYGate(q, -2.747695624736883, 3);
+  sqcRYGate(q, 1.569761037377259, 4);
+  sqcRYGate(q, 1.5956337905980755, 5);
+  sqcRYGate(q, 1.5701658889756, 6);
+  sqcRYGate(q, -1.574191227700678, 7);
+  sqcRYGate(q, -2.725737024808408, 8);
+  sqcRYGate(q, 1.5716295805243665, 9);
+  sqcRYGate(q, 1.5711489857292333, 10);
+  sqcRYGate(q, 1.571494590218809, 11);
+
+  FILE * IR_file = NULL;
+  IR_file = fopen(__FILE__"_IR.txt", "w");
+  sqcStoreQC(q, IR_file);
+  fclose(IR_file);
+
+  sqcTranspile(q, KIND, &opt);
+
+  FILE * Transpile_file = NULL;
+  Transpile_file = fopen(__FILE__"_TP.txt", "w");
+  sqcStoreQC(q, Transpile_file);
+  fclose(Transpile_file);
+
+  sqcDestroyQuantumCircuit(q);
+  sqcFinalize();
+  return 0;
+}
