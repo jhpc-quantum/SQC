@@ -1,0 +1,6 @@
+error: sqcStoreQCtoMemory: Shortage size to write OpenQASM string.
+error code: -2
+-- return sqcStoreQCtoMemory before sqcTranspile (50) --
+OPENQASM 3.0;
+include "stdgates.inc";
+qubit[2] q;
