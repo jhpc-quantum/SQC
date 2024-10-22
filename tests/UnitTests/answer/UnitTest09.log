@@ -1,0 +1,8 @@
+[ DEBUG ] The provider to use for transpilation : Fake20QV1 From qiskit.providers.fake_provider  (optLevel=1)
+error: sqcStoreQCtoMemory: Shortage size to write OpenQASM string.
+error code: -2
+-- return sqcStoreQCtoMemory before sqcTranspile (50) --
+OPENQASM 3.0;
+include "stdgates.inc";
+bit[2] c;
+u
