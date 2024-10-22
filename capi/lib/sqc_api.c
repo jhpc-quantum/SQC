@@ -209,7 +209,7 @@ void sqcSdgGate(sqcQC* qcHandle, int qubitNumber)
 void sqcMeasure(sqcQC* qcHandle, int qubitNumber, int clbitNumber, sqcMeasureOptions options)
 {
     if(options != NULL){
-        printf("sqcMeasureOptions is not supported.");
+        printf("error: %s: sqcMeasureOptions is not supported.\n", __func__);
         exit(1);
     }
     int n =qcHandle->ngates;
@@ -224,13 +224,14 @@ void sqcMeasure(sqcQC* qcHandle, int qubitNumber, int clbitNumber, sqcMeasureOpt
 int sqcStoreQCtoMemory(sqcQC* qcHandle, void* address, size_t size)
 {
     if(qcHandle->pyTranspiledQuantumCircuit == NULL && qcHandle->ngates == 0){
-#ifdef DEBUG_ERROR_STOP     
-        printf("This function is not available because there is no QuantumCircuit.\n");
+#ifdef DEBUG_ERROR_STOP   
+        printf("error: %s: This function is not available because there is no QuantumCircuit.\n", __func__);
         exit(1);
 #endif
     }
 
     if(address == NULL){
+        printf("error: %s: Specified address is NULL.\n", __func__);
         return E_NULL_POINTER;
     }
 
@@ -256,6 +257,7 @@ int sqcStoreQCtoMemory(sqcQC* qcHandle, void* address, size_t size)
             memcpy(address, qasmStrTranspiled, size);
             *((char*)address+size-1) = '\0';
             Py_XDECREF(pyTranspiledStr);
+            printf("error: %s: Shortage size to write OpenQASM string.\n", __func__);
             return E_SHORTAGE_SIZE;
         }
         memcpy(address, qasmStrTranspiled, buflen);
@@ -268,6 +270,7 @@ int sqcStoreQCtoMemory(sqcQC* qcHandle, void* address, size_t size)
             memcpy(address, tmpbuf, size);
             *((char*)address+size-1) = '\0';
             free(tmpbuf);
+            printf("error: %s: Shortage size to write OpenQASM string.\n", __func__);
             return E_SHORTAGE_SIZE;
         }
         memcpy(address, tmpbuf, buflen);
@@ -281,14 +284,15 @@ int sqcStoreQCtoMemory(sqcQC* qcHandle, void* address, size_t size)
 int sqcStoreQC(sqcQC* qcHandle, FILE* file)
 {
     if(qcHandle->pyTranspiledQuantumCircuit == NULL && qcHandle->ngates == 0){    
-#ifdef DEBUG_ERROR_STOP     
-        printf("This function is not available because there is no QuantumCircuit.\n");
+#ifdef DEBUG_ERROR_STOP 
+        printf("error: %s: This function is not available because there is no QuantumCircuit.\n", __func__);
         exit(1);
 #endif
     }
     
     if (file == NULL) {
         // Error return if file handler passed by user is NULL.
+        printf("error: %s: Specified file handle is NULL.\n", __func__);
         return E_NULL_POINTER;
     }
 
@@ -328,7 +332,8 @@ void sqcTranspile(sqcQC* qcHandle, sqcTranspileKind kind, sqcTranspileOptions op
     // Checking for available providers.
     switch(kind){
         case BasicSimulator:
-            printf("!!! unknown provider specified....\n"); exit(1);
+            printf("error: %s: Specified provider is unsupported.\n", __func__);
+            exit(1);
             break;
         case FakeOpenPulse2Q:
         case FakeOpenPulse3Q:
@@ -344,7 +349,8 @@ void sqcTranspile(sqcQC* qcHandle, sqcTranspileKind kind, sqcTranspileOptions op
                 ((sqcFakeProviderOption*)options)->optLevel);
             break;
         default:
-            printf("!!! unknown provider specified....\n"); exit(1);
+            printf("error: %s: !!! unknown provider specified....\n", __func__);
+            exit(1);
             break;
     }
 
@@ -481,7 +487,8 @@ char* gateInfo2qasm(sqcQC* qcHandle)
                 sprintf(t, "c[%d] = measure q[%d];\n",g->iarg[1], g->iarg[0]);
                 break;
             default:
-                printf("The gate ID %d is not implemented\n",qcHandle->gate[i].id); exit(1);
+                assert(0 && "unknown gate ID");
+                abort();
                 break;
         }
         strcat(s, t);
