@@ -1,5 +1,7 @@
 /// \file sqc_api.h
 /// \brief API to generate qasm3
+///
+/// Copyright (c) RIKEN, Japan. All rights reserved.
 
 #include <stdio.h>
 
@@ -111,13 +113,13 @@ int sqcInitialize(char* channel, char* token);
 sqcQC* sqcQuantumCircuit(int qubits);
 
 /// \brief Quantum Circuit IR Region Release
-/// \param [in] qcHandle Handler of quantum circuit IR
+/// \param [in, out] qcHandle Handler of quantum circuit IR
 ///
 /// \return None
 void sqcDestroyQuantumCircuit(sqcQC* qcHandle);
 
 /// \brief Add h gate to quantum circuit IR
-/// \param [out] qcHandle Handler of quantum circuit IR
+/// \param [in, out] qcHandle Handler of quantum circuit IR
 /// \param [in] qubitNumber Target qubit number
 ///
 /// \return None
@@ -125,7 +127,7 @@ void sqcDestroyQuantumCircuit(sqcQC* qcHandle);
 void sqcHGate(sqcQC* qcHandle, int qubitNumber);
 
 /// \brief Add cx gate to quantum circuit IR
-/// \param [out] qcHandle Handler of quantum circuit IR
+/// \param [in, out] qcHandle Handler of quantum circuit IR
 /// \param [in] qubitNumber1 control bit number
 /// \param [in] qubitNumber2 target bit number
 ///
@@ -134,7 +136,7 @@ void sqcHGate(sqcQC* qcHandle, int qubitNumber);
 void sqcCXGate(sqcQC* qcHandle, int qubitNumber1, int qubitNumber2);
 
 /// \brief Add cz gate to quantum circuit IR
-/// \param [out] qcHandle Handler of quantum circuit IR
+/// \param [in, out] qcHandle Handler of quantum circuit IR
 /// \param [in] qubitNumber1 control bit number
 /// \param [in] qubitNumber2 target bit number
 ///
@@ -143,7 +145,7 @@ void sqcCXGate(sqcQC* qcHandle, int qubitNumber1, int qubitNumber2);
 void sqcCZGate(sqcQC* qcHandle, int qubitNumber1, int qubitNumber2);
 
 /// \brief Add rx gate to quantum circuit IR
-/// \param [out] qcHandle Handler for quantum circuit IR
+/// \param [in, out] qcHandle Handler for quantum circuit IR
 /// \param [in] theta Rotation angle
 /// \param [in] qubitNumber target bit number
 ///
@@ -152,7 +154,7 @@ void sqcCZGate(sqcQC* qcHandle, int qubitNumber1, int qubitNumber2);
 void sqcRXGate(sqcQC* qcHandle, double theta, int qubitNumber);
 
 /// \brief Add ry gate to quantum circuit IR
-/// \param [out] qcHandle Handler for quantum circuit IR
+/// \param [in, out] qcHandle Handler for quantum circuit IR
 /// \param [in] theta Rotation angle
 /// \param [in] qubitNumber target bit number
 ///
@@ -161,8 +163,8 @@ void sqcRXGate(sqcQC* qcHandle, double theta, int qubitNumber);
 void sqcRYGate(sqcQC* qcHandle, double theta, int qubitNumber);
 
 /// \brief Add rz gate to quantum circuit IR
-/// \param [out] qcHandle Handler for quantum circuit IR
-/// \param [in] phi rotation angle
+/// \param [in, out] qcHandle Handler for quantum circuit IR
+/// \param [in] phi Rotation angle
 /// \param [in] qubitNumber target bit number
 ///
 /// \return None
@@ -170,7 +172,7 @@ void sqcRYGate(sqcQC* qcHandle, double theta, int qubitNumber);
 void sqcRZGate(sqcQC* qcHandle, double phi, int qubitNumber);
 
 /// \brief Add s gate to quantum circuit IR
-/// \param [out] qcHandle Handler for quantum circuit IR
+/// \param [in, out] qcHandle Handler for quantum circuit IR
 /// \param [in] qubitNumber Target bit number
 ///
 /// \return None
@@ -178,7 +180,7 @@ void sqcRZGate(sqcQC* qcHandle, double phi, int qubitNumber);
 void sqcSGate(sqcQC* qcHandle, int qubitNumber);
 
 /// \brief Add sdg gate to quantum circuit IR
-/// \param [out] qcHandle Handler for quantum circuit IR
+/// \param [in, out] qcHandle Handler for quantum circuit IR
 /// \param [in] qubitNumber target bit number
 ///
 /// \return None
@@ -186,7 +188,7 @@ void sqcSGate(sqcQC* qcHandle, int qubitNumber);
 void sqcSdgGate(sqcQC* qcHandle, int qubitNumber);
 
 /// \brief Add x gate to quantum circuit IR
-/// \param [out] qcHandle Handler for quantum circuit IR
+/// \param [in, out] qcHandle Handler for quantum circuit IR
 /// \param [in] qubitNumber target bit number
 ///
 /// \return None
@@ -194,7 +196,7 @@ void sqcSdgGate(sqcQC* qcHandle, int qubitNumber);
 void sqcXGate(sqcQC* qcHandle, int qubitNumber);
 
 /// \brief Add u1 gate to quantum circuit IR
-/// \param [out] qcHandle Handler for quantum circuit IR
+/// \param [in, out] qcHandle Handler for quantum circuit IR
 /// \param [in] lam Rotation angle
 /// \param [in] qubitNumber Target bit number
 ///
@@ -203,7 +205,7 @@ void sqcXGate(sqcQC* qcHandle, int qubitNumber);
 void sqcU1Gate(sqcQC* qcHandle, double lam, int qubitNumber);
 
 /// \brief Add ecr gate to quantum circuit IR
-/// \param [out] qcHandle Handler for quantum circuit IR
+/// \param [in, out] qcHandle Handler for quantum circuit IR
 /// \param [in] qubitNumber1 Target bit number1
 /// \param [in] qubitNumber2 Target bit number2
 ///
@@ -212,7 +214,7 @@ void sqcU1Gate(sqcQC* qcHandle, double lam, int qubitNumber);
 void sqcECRGate(sqcQC* qcHandle, int qubitNumber1, int qubitNumber2);
 
 /// \brief Add sx gate to quantum circuit IR
-/// \param [out] qcHandle Handler for quantum circuit IR
+/// \param [in, out] qcHandle Handler for quantum circuit IR
 /// \param [in] qubitNumber Target bit number
 ///
 /// \return None
@@ -220,7 +222,7 @@ void sqcECRGate(sqcQC* qcHandle, int qubitNumber1, int qubitNumber2);
 void sqcSXGate(sqcQC* qcHandle, int qubitNumber);
 
 /// \brief Add id gate to quantum circuit IR
-/// \param [out] qcHandle Handler for quantum circuit IR
+/// \param [in, out] qcHandle Handler for quantum circuit IR
 /// \param [in] qubitNumber Target bit number
 ///
 /// \return None
@@ -228,7 +230,7 @@ void sqcSXGate(sqcQC* qcHandle, int qubitNumber);
 void sqcIDGate(sqcQC* qcHandle, int qubitNumber);
 
 /// \brief Delays the operation of the qubit
-/// \param [out] qcHandle Handler for quantum circuit IR
+/// \param [in, out] qcHandle Handler for quantum circuit IR
 /// \param [in] duration Time to delay
 /// \param [in] unit Unit of time to delay
 /// \param [in] qubitNumber Target bit number
@@ -238,7 +240,7 @@ void sqcIDGate(sqcQC* qcHandle, int qubitNumber);
 void sqcDelay(sqcQC* qcHandle, double duration, sqcUnitKind unit, int qubitNumber);
 
 /// \brief Delays the operation of all qubits
-/// \param [out] qcHandle Handler for quantum circuit IR
+/// \param [in, out] qcHandle Handler for quantum circuit IR
 /// \param [in] duration Time to delay
 /// \param [in] unit Unit of time to delay
 ///
@@ -247,7 +249,7 @@ void sqcDelay(sqcQC* qcHandle, double duration, sqcUnitKind unit, int qubitNumbe
 void sqcDelayAll(sqcQC* qcHandle, double duration, sqcUnitKind unit);
 
 /// \brief Reset the qubit to default state.
-/// \param [out] qcHandle Handler for quantum circuit IR
+/// \param [in, out] qcHandle Handler for quantum circuit IR
 /// \param [in] qubitNumber Target bit number
 ///
 /// \return None
@@ -255,14 +257,14 @@ void sqcDelayAll(sqcQC* qcHandle, double duration, sqcUnitKind unit);
 void sqcReset(sqcQC* qcHandle, int qubitNumber);
 
 /// \brief Reset the All qubit to defalut state.
-/// \param [out] qcHandle Handler for quantum circuit IR
+/// \param [in, out] qcHandle Handler for quantum circuit IR
 ///
 /// \return None
 ///
 void sqcResetAll(sqcQC* qcHandle);
 
 /// \brief Apply Barrier to the qubit. 
-/// \param [out] qcHandle Handler for quantum circuit IR
+/// \param [in, out] qcHandle Handler for quantum circuit IR
 /// \param [in] qubitNumber Target bit number
 ///
 /// \return None
@@ -270,14 +272,14 @@ void sqcResetAll(sqcQC* qcHandle);
 void sqcBarrier(sqcQC* qcHandle, int qubitNumber);
 
 /// \brief Apply Barrier to all qubits.
-/// \param [out] qcHandle Handler for quantum circuit IR
+/// \param [in, out] qcHandle Handler for quantum circuit IR
 ///
 /// \return None
 ///
 void sqcBarrierAll(sqcQC* qcHandle);
 
 /// \brief Add Measure to quantum circuit IR
-/// \param [out] qcHandle Handler for quantum circuit IR
+/// \param [in, out] qcHandle Handler for quantum circuit IR
 /// \param [in] qubitNumber Quantum bit number to measure
 /// \param [in] clbitNumber classical bit number
 /// \param [in] options Data structure for specifying options
@@ -316,7 +318,7 @@ int sqcStoreQCtoMemory(sqcQC* qcHandle, void* address, size_t size);
 int sqcStoreQC(sqcQC* qcHandle, FILE* file);
 
 /// \brief Transpile a quantum circuit IR and output its circuit information in PyObject type
-/// \param [in] qcHandle Handler of quantum circuit IR
+/// \param [in, out] qcHandle Handler of quantum circuit IR
 /// \param [in] kind Transpile Target Provider Number
 /// \param [in] options Data structure for indicating options
 ///
