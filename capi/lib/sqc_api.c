@@ -1,5 +1,7 @@
 /// \file sqc_api.c
 /// \brief API to generate qasm3
+///
+/// Copyright (c) RIKEN, Japan. All rights reserved.
 /// 
 /// \note
 /// - When outputting an error, it does not indicate which API it occurred in.
@@ -58,6 +60,7 @@ enum enumGates{
     NGates /// Number of gates
 };
 
+/// \brief Precision of rotation angle in sqcRXGate, sqcRYGate, sqcRZGate, sqcU1Gate
 #define PRECISION 20
 
 /// \brief Information management area used in C-API processing
