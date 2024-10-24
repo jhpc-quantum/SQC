@@ -1,5 +1,6 @@
 CC=gcc
 CFLAGS=-O2 -Wall -Wextra -fPIC
+TESTFLAGS=-D CIRCUIT -D MEMORY
 
 # Running options on Fugaku's login nodes
 # PY_PATH=/vol0004/apps/oss/spack-v0.21/opt/spack/linux-rhel8-cascadelake/gcc-13.2.0/python-3.11.6-yjlixq5gurvspzwveq6tfrqonplxu7m3
@@ -24,8 +25,8 @@ libsqc_api.so: lib/sqc_api.c
 	mkdir -p build
 	$(CC) $(CFLAGS) -shared $< -o ./build/libsqc_api.so $(PYINC) $(PYLIB)
 
-test: ../sample/target1.c
-	$(CC) -Wall -I ./include $< -L./build -lsqc_api -o ./build/test
+test: ../tests/UnitTests/src/UnitTestProgramExample.c
+	$(CC) $(TESTFLAGS) -Wall -I ./include $< -L./build -lsqc_api -o ./build/test
 
 debug: lib/sqc_api.c
 	mkdir -p build
