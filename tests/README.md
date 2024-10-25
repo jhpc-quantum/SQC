@@ -32,50 +32,50 @@ tests
 ## About Scripts
 #### `qasm2c/tools/qasm2c.py`:　Script to convert .qasm to C-API test.
 
-#### Input Example：
+#### Example：
 ```
 $ python3 qasm2c.py input.qasm output.c
 ```
 #### `qasm2c/tools/qasm2c_all.sh`:　Script to convert all .qasm in all directories to C-API tests.
-#### Input Example：
+#### Example：
 ```
 $ bash qasm2c_all.sh in_directory out_directory
 ```
 #### `qasm2c/tools/translation_all.sh`:　Script to translate and run the converted C-API tests.
-#### Input Example：
+#### Example：
 ```
 $ bash translation_all.sh
 ```
 #### `qasm2c/tools/qiskit_1to1.py`： Script to run qiskit.
-#### Input Example：
+#### Example：
 ```
 $ python3 qiskit_1to1.py input.txt
 ```
 #### `qasm2c/tools/qiskit_all.sh`： Script to run qiskit for all directories under the specified directory.
-#### Input Example：
+#### Example：
 ```
 $ bash qiskit_all.sh
 ```
 #### `qasm2c/tools/run_compute_node.sh`:　Script to run a series of tests with the target application in Fugaku.
-#### Input Example：
+#### Example：
 ```
 $ qsub run_compute_node.sh
 ```
 
 #### `UnitTest/tools/UnitTest0*.sh`： Individual unit tests
-#### Input Example：
+#### Example：
 ```
 $ bash UnitTest001.sh
 ```
 
 #### `UnitTest/tools/UnitTest_all.sh`： Script to run all unit tests
-#### Input Example：
+#### Example：
 ```
 $ bash UnitTest_all.sh
 ```
 
 #### `UnitTest/tools/run_compute_node.sh`： Script to run UnitTest_all.sh in Fugaku
-#### Input Example：
+#### Example：
 ```
 $ qsub run_compute_node.sh
 ```
