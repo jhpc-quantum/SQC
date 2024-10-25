@@ -20,5 +20,4 @@ source ~/pass/to/bin/activate
 # Execute
 export LD_LIBRARY_PATH=/vol0004/apps/oss/spack-v0.21/opt/spack/linux-rhel8-a64fx/gcc-13.2.0/python-3.11.6-7x2kdfqu57k7ej5hvkhbz6mjptpqhwuy/lib
 
-./translation_all.sh
-./qiskit_all.sh
+./UnitTest_all.sh
