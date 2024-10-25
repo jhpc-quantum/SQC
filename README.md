@@ -8,13 +8,13 @@ SQC is interface to use Qiskit with C-lang.
 - qiskit(1.2.4)
 - qiskit-qasm3-import(0.5.0)
 
-v3.8 or higher Python@version%gcc of spack , this procedure uses "7x2kdfq python" in orange.
+v3.8 or higher Python@version%gcc of spack , this procedure uses "7x2kdfq python".
 |Available Python|
 |---|
 k3kgiz6 python@3.10.13%gcc@13.2.0 arch=linux-rhel8-a64fx
 kpspsnw python@3.11.6%gcc@8.5.0 arch=linux-rhel8-a64fx
 3wxkbij python@3.11.6%gcc@12.2.0 arch=linux-rhel8-a64fx
-<span style="color: orange; ">7x2kdfq python@3.11.6%gcc@13.2.0 arch=linux-rhel8-a64fx</span>
+7x2kdfq python@3.11.6%gcc@13.2.0 arch=linux-rhel8-a64fx
 
 ## Prepare Qiskit
 This section describes the build procedure at Fugaku (compute node).
@@ -96,5 +96,8 @@ $ # execute
 (qiskitenv_compute_node) $ ./a.out
 ```
 
+## C-API and C-API-specific types lists of SQC 
+See [docs/SQC.md](docs/SQC.md).
+
 ## Test
-See [tests/README.md](tests/README.md) for Test
+See [tests/README.md](tests/README.md) for Test.
