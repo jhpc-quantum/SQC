@@ -59,7 +59,7 @@ $ bash qiskit_all.sh
 #### `qasm2c/tools/run_compute_node.sh`:　Script to run a series of tests with the target application in Fugaku.
 #### Example：
 ```
-$ qsub run_compute_node.sh
+$ pjsub run_compute_node.sh
 ```
 
 #### `UnitTest/tools/UnitTest0*.sh`： Individual unit tests
