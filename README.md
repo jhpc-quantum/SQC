@@ -17,7 +17,7 @@ kpspsnw python@3.11.6%gcc@8.5.0 arch=linux-rhel8-a64fx
 7x2kdfq python@3.11.6%gcc@13.2.0 arch=linux-rhel8-a64fx
 
 ## Prepare Qiskit
-This section describes the build procedure at Fugaku (compute node).
+This section describes the Qiskit prepare procedure at Fugaku (compute node).
 ```bash
 $ # load spack environment 
 $ . /vol0004/apps/oss/spack/share/spack/setup-env.sh
@@ -62,7 +62,7 @@ $ source path/to/qiskitenv_compute_node/bin/activate
 $ # execute build check program
 (qiskitenv_compute_node) $ ./build/test
 ```
-Success if the following string is output
+Success if the following string is output.
 ```
 -- return sqcStoreQCtoMemory before sqcTranspile (105) --
 OPENQASM 3.0;
@@ -75,7 +75,7 @@ c[0] = measure q[0];
 ```
 
 ## Usage
-This section describes the build procedure at Fugaku (compute node).
+This section describes the usage of SQC at Fugaku (compute node).
 1) compile
 ```bash
 $ # load spack environment

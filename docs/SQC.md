@@ -9,8 +9,8 @@ List C-API and C-API-specific types available in SQC.
 
 | C-API | return value | arguments | abstract |
 | -- | -- | -- | -- |
-|int sqcInitialize(char* channel, char* token)|0：Correctly END|channel：channel type<br>token：API token|Start the use of the C-API.<br>Must not be called more than once in a process.|
-|int sqcFinalize()|0：Correctly END|None|End the use of the C-API.<br>Must not be called more than once in a process.|
+|int sqcInitialize(char* channel, char* token)|E_SUCCESS：Correctly END.|channel：channel type<br>token：API token|Start the use of the C-API.<br>Must not be called more than once in a process.|
+|int sqcFinalize()|E_SUCCESS：Correctly END.|None|End the use of the C-API.<br>Must not be called more than once in a process.|
 
 **2) Create and destroy cirucit API**
 
@@ -49,7 +49,7 @@ List C-API and C-API-specific types available in SQC.
 **4) Store API**
 | C-API | return value | arguments | abstract |
 | -- | -- | -- | -- |
-|int sqcStoreQC(sqcQC* qcHandle, FILE* file)|0：Correctly END<br>E_NULL_POINTER：Specified file is NULL|qcHandle：Handle of quantum circuit<br>file：Handler of the file to be written|Convert the quantum circuit before or after transpiling to an Open3.0QASM string and write it to a file. Convert the circuit to a QASM string if it has been transpiled, otherwise convert the circuit before transpiling.|
+|int sqcStoreQC(sqcQC* qcHandle, FILE* file)|E_SUCCESS：Correctly END.<br>E_NULL_POINTER：Specified file is NULL|qcHandle：Handle of quantum circuit<br>file：Handler of the file to be written|Convert the quantum circuit before or after transpiling to an Open3.0QASM string and write it to a file. Convert the circuit to a QASM string if it has been transpiled, otherwise convert the circuit before transpiling.|
 |int sqcStoreQCtoMemory(sqcQC* qcHandle, void* address, size_t size)|Positive value： Normal completion(OpenQASM strings length)<br>E_NULL_POINTER：Specified address is NULL<br>E_SHORTAGE_SIZE：Shortage size to write OpenQASM string|qcHandle：Handle of quantum circuit<br>address：Pointer to buffer to store OpenQASM string<br>size：Buffer Size|Convert the quantum circuit before or after transpiling into an OpenQASM3.0 string and write it to memory at the address specified in the argument. If the circuit has been transpiled, it is converted to the QASM string, otherwise the circuit before transpiling is converted to the QASM string.|
 
 **5) Transpile API**
@@ -102,6 +102,7 @@ The strings listed in the table below can be specified.
 | Fake7QPulseV1 | Fake7QPulseV1 |
 | Fake27QPulseV1 | Fake27QPulseV1 |
 | Fake127QpulseV1 | Fake127QpulseV1 |
+
 *Currently, BasicSimulator is not available as it does not implement the option.
 
 **5) sqcTranspileOptions**
@@ -125,11 +126,16 @@ Below is a description of the structure that specifies the options.
 | -- | -- |
 | sqcFakeProviderOption | int optLevel: optimization_level of Qiskit's transpile option<br>Possible values are 0, 1, 2, 3. |
 
-## Error code
-
-Below is a description of error code in sqcStoreQC and sqcStoreQCtoMemory.
-| Error code | meaning |
+## Return code
+Below is a description of return code in sqcInitialize and sqcFinalize.
+| return code | meaning |
 | -- | -- |
+| E_SUCCESS | Correctly END. |
+
+Below is a description of return code in sqcStoreQC and sqcStoreQCtoMemory.
+| return code | meaning |
+| -- | -- |
+| E_SUCCESS | Correctly END. |
 | E_NULL_POINTER | Specified argument is NULL. |
 | E_SHORTAGE_SIZE | Shortage size to write OpenQASM string. |
 
