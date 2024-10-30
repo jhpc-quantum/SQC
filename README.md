@@ -1,4 +1,5 @@
 # SQC
+This is a repository for software of supercomputing and quantum computing.
 
 ## Introduction
 SQC is interface to use Qiskit with C-lang.
