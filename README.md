@@ -101,3 +101,4 @@ See [docs/SQC.md](docs/SQC.md).
 
 ## Test
 See [tests/README.md](tests/README.md) for Test.
+This is a repository for software of supercomputing and quantum computing.
