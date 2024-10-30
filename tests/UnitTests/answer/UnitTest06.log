@@ -1,0 +1,5 @@
+[ DEBUG ] The provider to use for transpilation : Fake20QV1 From qiskit.providers.fake_provider  (optLevel=1)
+error: sqcStoreQCtoMemory: Specified address is NULL.
+error code: -1
+-- return sqcStoreQCtoMemory before sqcTranspile (150) --
+(null)
