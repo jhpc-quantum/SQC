@@ -577,7 +577,7 @@ int sqcFinalize(void)
 /// ```
 char* gateInfo2qasm(sqcQC* qcHandle)
 {
-    char       t[512];
+    char       t[512], u[512];
     gateInfo *g;
     unsigned int useECRGate = 0;
 
@@ -696,7 +696,11 @@ char* gateInfo2qasm(sqcQC* qcHandle)
                 sprintf(t, "barrier q;\n");
                 break; 
             case Measure:
-                sprintf(t, "c[%d] = measure q[%d];\n",g->iarg[1], g->iarg[0]);
+                for(int i=0; i<g->iarg[0]; i++){
+                  memset(u, 0, 512);      
+                  sprintf(u, "c[%d] = measure q[%d];\n",i, i);
+                  strcat(t, u);
+                }
                 break;
             default:
                 assert(0 && "unknown gate ID");
