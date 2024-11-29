@@ -474,7 +474,7 @@ void sqcTranspile(sqcQC* qcHandle, sqcTranspileKind kind, sqcTranspileOptions op
         case Fake20QV1:
         case Fake7QPulseV1:
         case Fake27QPulseV1:
-        case Fake127QpulseV1:
+        case Fake127QPulseV1:
             printf("[ DEBUG ] The provider to use for transpilation : %s From %s  (optLevel=%d)\n",
                 providerInfo[kind][1],
                 providerInfo[kind][0],
