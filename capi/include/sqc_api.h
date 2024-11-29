@@ -24,7 +24,7 @@ typedef enum {
   Fake20QV1,         ///< Fake20QV1
   Fake7QPulseV1,     ///< Fake7QPulseV1
   Fake27QPulseV1,    ///< Fake27QPulseV1
-  Fake127QpulseV1,   ///< Fake127QpulseV1
+  Fake127QPulseV1,   ///< Fake127QpulseV1
   NProviders        ///< Number of provieders
 } sqcTranspileKind;
 
