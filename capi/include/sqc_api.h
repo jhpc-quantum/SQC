@@ -4,6 +4,10 @@
 /// Copyright (c) RIKEN, Japan. All rights reserved.
 
 #include <stdio.h>
+#include <stdbool.h>
+#include "sqc_out.h"
+#include "sqc_rpc_sched_enums.h"
+#include "rpc_auth_method.h"
 
 /// \brief Unit of time to delay in sqcDelay and sqcDelayAll
 typedef enum{
@@ -14,28 +18,34 @@ typedef enum{
   UnitDT ///< integer time unit depending on the target backend
 } sqcUnitKind;
 
-/// \brief Enum specifying provider in sqcTranspile
-typedef enum {
-  BasicSimulator,    ///< BasicSimulator
-  FakeOpenPulse2Q,   ///< FakeOpenPulse2Q
-  FakeOpenPulse3Q,   ///< FakeOpenPulse3Q
-  Fake1Q,            ///< Fake1Q
-  Fake5QV1,          ///< Fake5QV1
-  Fake20QV1,         ///< Fake20QV1
-  Fake7QPulseV1,     ///< Fake7QPulseV1
-  Fake27QPulseV1,    ///< Fake27QPulseV1
-  Fake127QPulseV1,   ///< Fake127QpulseV1
-  NProviders        ///< Number of provieders
-} sqcTranspileKind;
-
 /// \brief Data structure specifying options for transpiling
 typedef void* sqcTranspileOptions;
 
-/// \brief Options for transpiling using providers prefixed with Fake
-/// \note Now only the optimization level can be specified.
+typedef sqc_rpc_sched_qc_type_t sqcBackend;
+
+/// \brief Options for Init
 typedef struct{
- int optLevel;
-} sqcFakeProviderOption;
+  char use_qiskit;
+} sqcInitOptions;
+
+sqcInitOptions *sqcMallocInitOptions();
+void            sqcFreeInitOptions(sqcInitOptions *);
+
+
+/// \brief Options for run 
+/// \note -
+typedef struct{
+ int           optLevel;
+ int           nshots;
+ int           qubits;
+ int           priority;
+ int           auth_method;
+ int           authorized;
+ sqcOutputKind outFormat;
+ sqcInputKind  inFormat;
+} sqcRunOptions;
+
+void            sqcInitializeRunOpt(sqcRunOptions* );
 
 /// \brief Data structure specifying options when sqcMeasure is used.
 typedef void* sqcMeasureOptions;
@@ -68,10 +78,13 @@ typedef struct{
 /// - It is not possible to hold more than MAX_N_GATES operations.
 typedef struct{
   // --- common parameters --- 
-  int       qubits;
-  int       ngates; 
-  gateInfo gate[MAX_N_GATES]; 
-  void*     pyTranspiledQuantumCircuit;
+  int        qubits;
+  int        ngates; 
+  gateInfo   gate[MAX_N_GATES]; 
+  void*      pyTranspiledQuantumCircuit;
+  char*      qasm;
+  char       *backend_config_json; // info for transpile
+  char       *backend_props_json;  // info for transpile
 } sqcQC;
 
 // Error code of all function.
@@ -101,7 +114,7 @@ typedef struct{
 ///       Therefore, by keeping the function objects of loads, dumps, and transpile that are used multiple times in the management area,
 ///       we ensure that the same import is not performed.
 /// \note ・Arguments currently unused.
-int sqcInitialize(char* channel, char* token);
+int sqcInitialize(sqcInitOptions *opt);
 
 /// \brief Obtaining the quantum circuit IR region
 /// \details Obtains and returns the quantum circuit IR region. APIs such as adding operations use the value returned by this API.
@@ -116,7 +129,13 @@ sqcQC* sqcQuantumCircuit(int qubits);
 /// \param [in, out] qcHandle Handler of quantum circuit IR
 ///
 /// \return None
+#ifdef __cplusplus
+extern "C" {
+#endif
 void sqcDestroyQuantumCircuit(sqcQC* qcHandle);
+#ifdef __cplusplus
+}
+#endif 
 
 /// \brief Add h gate to quantum circuit IR
 /// \param [in, out] qcHandle Handler of quantum circuit IR
@@ -229,6 +248,14 @@ void sqcSXGate(sqcQC* qcHandle, int qubitNumber);
 ///
 void sqcIDGate(sqcQC* qcHandle, int qubitNumber);
 
+/// \brief Add z gate to quantum circuit IR
+/// \param [in, out] qcHandle Handler for quantum circuit IR
+/// \param [in] qubitNumber Target bit number
+///
+/// \return None
+///
+void sqcZGate(sqcQC* qcHandle, int qubitNumber);
+
 /// \brief Delays the operation of the qubit
 /// \param [in, out] qcHandle Handler for quantum circuit IR
 /// \param [in] duration Time to delay
@@ -287,6 +314,7 @@ void sqcBarrierAll(sqcQC* qcHandle);
 /// \return None
 ///
 void sqcMeasure(sqcQC* qcHandle, int qubitNumber, int clbitNumber, sqcMeasureOptions options);
+void sqcMeasureAll(sqcQC* qcHandle);
 
 /// \brief Specified address is NULL of sqcStoreQC and sqcStoreQCtoMemory.
 #define E_NULL_POINTER (-1)
@@ -303,8 +331,15 @@ void sqcMeasure(sqcQC* qcHandle, int qubitNumber, int clbitNumber, sqcMeasureOpt
 /// \retval E_SHORTAGE_SIZE Shortage size to write OpenQASM string.
 /// \note 
 /// - If there is no circuit that can output, the process continues.
-/// - If "debug" is performed at build time, the program will exit with a message.
-int sqcStoreQCtoMemory(sqcQC* qcHandle, void* address, size_t size);
+/// - If "debug" is performed at build time, the program will exit with a message
+#ifdef __cplusplus
+extern "C"{
+#endif
+int sqcConvQASMtoMemory(sqcQC* qcHandle, sqcBackend backend, void* address, size_t size);
+int sqcStoreQCtoMemory(sqcQC* qcHandle, sqcBackend backend, void* address, size_t size);
+#ifdef __cplusplus
+}
+#endif
 
 /// \brief Generate OpenQASM string from quantum circuit IR and output to file
 /// \param [in] qcHandle Handler of quantum circuit IR
@@ -315,11 +350,12 @@ int sqcStoreQCtoMemory(sqcQC* qcHandle, void* address, size_t size);
 /// \note 
 /// - If there is no circuit that can output, the process continues.
 /// - If "debug" is performed at build time, the program will exit with a message.
+int sqcConvQASM(sqcQC* qcHandle, FILE* file);
 int sqcStoreQC(sqcQC* qcHandle, FILE* file);
 
 /// \brief Transpile a quantum circuit IR and output its circuit information in PyObject type
 /// \param [in, out] qcHandle Handler of quantum circuit IR
-/// \param [in] kind Transpile Target Provider Number
+/// \param [in] qpu Transpile Target Provider Number
 /// \param [in] options Data structure for indicating options
 ///
 /// \return None
@@ -332,8 +368,63 @@ int sqcStoreQC(sqcQC* qcHandle, FILE* file);
 ///       4. Specify a variable of type sqcTranspiledOptions in the “options” argument of sqcTranspile.
 ///
 /// \note 
-/// - At present, the only providers that can be specified for transpile are those defined in providerInfo.
-void sqcTranspile(sqcQC* qcHandle, sqcTranspileKind kind, sqcTranspileOptions options);
+/// - 
+void sqcTranspile(sqcQC* qcHandle, sqcBackend backend, sqcTranspileOptions options);
+
+/// \brief Run a quantum circuit on a specific 
+/// \param [in, out] qcHandle Handler of quantum circuit IR
+/// \param [in] backend quantum processor
+/// \param [in] options Data structure for indicating options
+/// \param [out] result a pointer to "JSON" string
+///
+/// \return Status
+/// 
+/// \note 
+/// - To specify options, do the following
+///
+/// \note 
+#ifdef __cplusplus
+extern "C"{
+#endif
+int sqcQCRun       (sqcQC* qcHandle, sqcBackend backend, sqcRunOptions options, sqcOut *result);
+int sqcQCRunAsync  (sqcQC* qcHandle, sqcBackend backend, sqcRunOptions options, char **job_id);
+int sqcQCWait      (sqcBackend backend, sqcRunOptions options, char *job_id, sqcOut *result);
+int sqcQTMQCRunTket(sqcQC* qcHandle, sqcBackend backend, sqcRunOptions options, int *len, char **result);
+#ifdef __cplusplus
+}
+#endif
+
+/// \brief Get a quantum circuit info to be used in Transpilation
+/// \param [in, out] qcHandle Handler of quantum circuit IR
+/// \param [in] backend quantum processor
+/// \param [in] options Data structure for indicating options
+/// \param [out] result a pointer to "JSON" string
+///
+/// \return Status
+/// 
+/// \note 
+/// - To specify options, do the following
+///
+/// \note 
+///   The information may be stored in sqc_rpc_schd, can not be accessed by client directly 
+///   because of the authorization
+#ifdef __cplusplus
+extern "C"{
+#endif
+int sqcIbmdTranspileInfo(sqcQC* qcHandle, sqcBackend backend);
+#ifdef __cplusplus
+}
+#endif
+
+/// \brief Read qasm file
+/// \param [in, out] pointer to string
+/// \param [in] filename
+/// \param [in] max string length
+///
+/// \return None
+/// 
+void sqcReadQasmFile(char **ptr, const char *fname, int maxlen);
+
 
 /// \brief Declare the end of C-API usage
 /// 
@@ -349,6 +440,17 @@ void sqcTranspile(sqcQC* qcHandle, sqcTranspileKind kind, sqcTranspileOptions op
 /// \note 
 /// - Like sqcInitialize, it can only be called once in a process.
 /// - It has not been investigated what happens if Py_Finalize is called multiple times in a process.
-int sqcFinalize(void);
+int sqcFinalize(sqcInitOptions *opt);
+
+#ifdef __cplusplus
+extern "C"{
+#endif
+void sqcPrintCidx(char *s, int n);
+void sqcPrintAllBin(char *s, int nqubits, int n);
+void sqcPrintAllChar(char **s, int nqubits, int n);
+#ifdef __cplusplus
+}
+#endif
+
 
 ////////////////////////////////
