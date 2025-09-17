@@ -143,6 +143,7 @@ rpc_job_status(rpc_session_client_t *session, const char *job_id,
       output->result = (char *)malloc(sizeof(char)*(len+1));
       memcpy(output->result, result, len);
       output->result[len] = 0;
+      output->n = len;
       ret = SQC_RESULT_OK;
     } else {
       ret = request_result;
