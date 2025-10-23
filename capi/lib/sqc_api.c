@@ -871,7 +871,7 @@ char* gateInfo2qasm2(sqcQC* qcHandle)
                 sprintf(t, "measure q[%d] -> c[%d];\n",g->iarg[0],g->iarg[0]);
                 break;
             case MeasureAll:
-                sprintf(t, "measure q ->c \n");
+                sprintf(t, "measure q ->c;\n");
                 break;
             default:
                 assert(0 && "unknown gate ID");

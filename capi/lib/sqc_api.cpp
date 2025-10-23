@@ -66,20 +66,24 @@ int sqcQTMQCRunTket(sqcQC* qcHandle, sqcBackend qc_type, sqcRunOptions options, 
   int res = 0;
   switch (qc_type) {
     case SQC_RPC_SCHED_QC_TYPE_UNKNOWN: {
-      fprintf(stderr,"ERROR(%s,%d):qc_type = %d is not supported yet\n",qc_type);
-      return res;
+      fprintf(stderr,"ERROR(%s):qc_type = %d is not supported yet\n",__func__,qc_type);
+      res = SQC_RESULT_UNSUPPORTED;
+      break;
     }
     case SQC_RPC_SCHED_QC_TYPE_RQC_REST: {
-      fprintf(stderr,"ERROR(%s,%d):qc_type = %d is not supported yet\n",qc_type);
-      return res;
+      fprintf(stderr,"ERROR(%s):qc_type = %d is not supported yet\n",__func__,qc_type);
+      res = SQC_RESULT_UNSUPPORTED;
+      break;
     }
     case SQC_RPC_SCHED_QC_TYPE_IBM_REST: {
-      fprintf(stderr,"ERROR(%s,%d):qc_type = %d is not supported yet\n",qc_type);
-      return res;
+      fprintf(stderr,"ERROR(%s):qc_type = %d is not supported yet\n",__func__,qc_type);
+      res = SQC_RESULT_UNSUPPORTED;
+      break;
     }
     case SQC_RPC_SCHED_QC_TYPE_SLURM_REST: {
-      fprintf(stderr,"ERROR(%s,%d):qc_type = %d is not supported yet\n",qc_type);
-      return res;
+      fprintf(stderr,"ERROR(%s):qc_type = %d is not supported yet\n",__func__,qc_type);
+      res = SQC_RESULT_UNSUPPORTED;
+      break;
     }
     case SQC_RPC_SCHED_QC_TYPE_QTM_GRPC: {
       sqcOut r;
@@ -100,19 +104,22 @@ int sqcQTMQCRunTket(sqcQC* qcHandle, sqcBackend qc_type, sqcRunOptions options, 
       return res;
     }
     case SQC_RPC_SCHED_QC_TYPE_IBM_DACC: {
-      fprintf(stderr,"ERROR(%s,%d):qc_type = %d is not supported yet\n",qc_type);
-      return res;
+      fprintf(stderr,"ERROR(%s):qc_type = %d is not supported yet\n",__func__,qc_type);
+      res = SQC_RESULT_UNSUPPORTED;
+      break;
     }
     case SQC_RPC_SCHED_QC_TYPE_DUMMY: {
-      fprintf(stderr,"ERROR(%s,%d):qc_type = %d is unknown\n",qc_type);
-      return res;
+      fprintf(stderr,"ERROR(%s):qc_type = %d is unknown\n",__func__,qc_type);
+      res = SQC_RESULT_INVALID_ARGS;
+      break;
     }
     default: {
-      fprintf(stderr,"ERROR(%s,%d):qc_type = %d is unknown\n",qc_type);
+      fprintf(stderr,"ERROR(%s):qc_type = %d is unknown\n",__func__,qc_type);
+      res = SQC_RESULT_INVALID_ARGS;
       break;
     }
   }
-  return 1; 
+  return res; 
 }  /* sqcQTMQCRunTket */
 
 // FROM:app/sqc_rpc_client/status.c, modified
@@ -139,11 +146,13 @@ rpc_job_status(rpc_session_client_t *session, const char *job_id,
         printf("  result  = '%s'\n", result);
       }
       // TODO (currently only "raw" is supported)
-      int len = strlen(result);
-      output->result = (char *)malloc(sizeof(char)*(len+1));
-      memcpy(output->result, result, len);
-      output->result[len] = 0;
-      output->n = len;
+      if (*status == SQC_RPC_SCHED_JOB_STATUS_DONE) {
+        int len = strlen(result);
+        output->result = (char *)malloc(sizeof(char)*(len+1));
+        memcpy(output->result, result, len);
+        output->result[len] = 0;
+        output->n = len;
+      }
       ret = SQC_RESULT_OK;
     } else {
       ret = request_result;
@@ -339,20 +348,24 @@ int sqcQCRun(sqcQC* qcHandle, sqcBackend qc_type, sqcRunOptions opt, sqcOut *res
   // TODO: transpiler will be specfied by options
   switch (qc_type) {
     case SQC_RPC_SCHED_QC_TYPE_UNKNOWN: {
-      fprintf(stderr,"ERROR(%s,%d):qc_type = %d is not supported yet\n",qc_type);
-      return res;
+      fprintf(stderr,"ERROR(%s):qc_type = %d is not supported yet\n",__func__,qc_type);
+      res = SQC_RESULT_UNSUPPORTED;
+      break;
     }
     case SQC_RPC_SCHED_QC_TYPE_RQC_REST: {
-      fprintf(stderr,"ERROR(%s,%d):qc_type = %d is not supported yet\n",qc_type);
-      return res;
+      fprintf(stderr,"ERROR(%s):qc_type = %d is not supported yet\n",__func__,qc_type);
+      res = SQC_RESULT_UNSUPPORTED;
+      break;
     }
     case SQC_RPC_SCHED_QC_TYPE_IBM_REST: {
-      fprintf(stderr,"ERROR(%s,%d):qc_type = %d is not supported yet\n",qc_type);
-      return res;
+      fprintf(stderr,"ERROR(%s):qc_type = %d is not supported yet\n",__func__,qc_type);
+      res = SQC_RESULT_UNSUPPORTED;
+      break;
     }
     case SQC_RPC_SCHED_QC_TYPE_SLURM_REST: {
-      fprintf(stderr,"ERROR(%s,%d):qc_type = %d is not supported yet\n",qc_type);
-      return res;
+      fprintf(stderr,"ERROR(%s):qc_type = %d is not supported yet\n",__func__,qc_type);
+      res = SQC_RESULT_UNSUPPORTED;
+      break;
     }
     case SQC_RPC_SCHED_QC_TYPE_QTM_GRPC: {
      res = u_subcmd_submit((rpc_auth_method)opt.auth_method, opt.priority, qasm_str.c_str(), opt.nshots, qc_type, "test", result);
@@ -367,12 +380,14 @@ int sqcQCRun(sqcQC* qcHandle, sqcBackend qc_type, sqcRunOptions opt, sqcOut *res
      return res;
     }
     case SQC_RPC_SCHED_QC_TYPE_DUMMY: {
-      fprintf(stderr,"ERROR(%s,%d):qc_type = %d is unknown\n",qc_type);
-      return res;
+      fprintf(stderr,"ERROR(%s):qc_type = %d is unknown\n",__func__,qc_type);
+      res = SQC_RESULT_INVALID_ARGS;
+      break;
     }
     default: {
-      fprintf(stderr,"ERROR(%s,%d):qc_type = %d is unknown\n",qc_type);
-      return res;
+      fprintf(stderr,"ERROR(%s):qc_type = %d is unknown\n",__func__,qc_type);
+      res = SQC_RESULT_INVALID_ARGS;
+      break;
     }
   }
 

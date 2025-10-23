@@ -1,3 +1,12 @@
+/// \file sqc_out.h
+/// \brief API related to execution results
+///
+/// Copyright (c) RIKEN, Japan. All rights reserved.
+
+#ifdef __cplusplus
+extern "C"{
+#endif
+
 typedef enum{
   SQC_OUT_RAW,
   SQC_OUT_HIST,
@@ -24,3 +33,7 @@ typedef struct sqc_out{
 
 void sqcFreeOut      (sqcOut *, sqcOutputKind);
 void sqcPrintQCResult(FILE *, sqcOut *, sqcOutputKind);
+
+#ifdef __cplusplus
+}
+#endif

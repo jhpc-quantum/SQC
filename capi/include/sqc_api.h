@@ -9,6 +9,10 @@
 #include "sqc_rpc_sched_enums.h"
 #include "rpc_auth_method.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /// \brief Unit of time to delay in sqcDelay and sqcDelayAll
 typedef enum{
   UnitS, ///< second
@@ -453,4 +457,7 @@ void sqcPrintAllChar(char **s, int nqubits, int n);
 #endif
 
 
+#ifdef __cplusplus
+}
+#endif
 ////////////////////////////////
