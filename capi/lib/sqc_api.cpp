@@ -129,21 +129,19 @@ int sqcQTMQCRunTket(sqcQC* qcHandle, sqcBackend qc_type, sqcRunOptions options, 
 // FROM:app/sqc_rpc_client/status.c, modified
 sqc_result_t
 rpc_job_status(rpc_session_client_t *session, const char *job_id,
-               sqc_rpc_sched_job_status_t *status, sqcOut *output) {
+               sqc_rpc_sched_job_status_t *status, sqc_result_t *code, sqcOut *output) {
   sqc_result_t ret = SQC_RESULT_ANY_FAILURES;
   sqc_result_t request_result = SQC_RESULT_ANY_FAILURES;
-  sqc_result_t code = SQC_RESULT_ANY_FAILURES;
   char *msg = NULL;
   char *result = NULL;
 
-
   if (likely(session != NULL && *session != NULL && job_id != NULL && status != NULL)) {
-    request_result = rpc_session_client_job_status(session, job_id, &code, &msg, status, &result);
+    request_result = rpc_session_client_job_status(session, job_id, code, &msg, status, &result);
 
     if (likely(request_result == SQC_RESULT_OK)) {
       sqc_msg_debug(5, "job_status request succeeded\n");
       printf("job_status reply:\n");
-      printf("  code    = %lld (%s)\n", (long long) code, sqc_error_get_string(code));
+      printf("  code    = %lld (%s)\n", (long long) *code, sqc_error_get_string(*code));
       printf("  message = '%s'\n", msg);
       printf("  status  = %d (%s)\n", (int) *status, sqc_rpc_sched_job_status_to_string(*status));
       if (result != NULL) {
@@ -256,7 +254,7 @@ int u_subcmd_submit(rpc_auth_method auth_method,
   int submit_result = SQC_RESULT_ANY_FAILURES;
   int status_result = SQC_RESULT_ANY_FAILURES;
   rpc_session_client_t session = NULL;
-
+  sqc_result_t code = SQC_RESULT_ANY_FAILURES;
 #ifdef TIMING
   double et1, et2, et3;
 #endif
@@ -289,7 +287,7 @@ int u_subcmd_submit(rpc_auth_method auth_method,
 
           for (;;) {
             sleep(sleep_interval);
-            status_result = rpc_job_status(&session, job_id, &job_status, result);
+            status_result = rpc_job_status(&session, job_id, &job_status, &code, result);
             if (likely(status_result == SQC_RESULT_OK)) {
               if (job_status == SQC_RPC_SCHED_JOB_STATUS_DONE ||
                   job_status == SQC_RPC_SCHED_JOB_STATUS_CANCELLED) {
@@ -300,7 +298,11 @@ int u_subcmd_submit(rpc_auth_method auth_method,
                          job_status == SQC_RPC_SCHED_JOB_STATUS_RUNNING) {
                 printf("\n");
               } else {
-                res = SQC_RESULT_INVALID_STATE;
+                if(code<0) {
+                  res = code;
+                } else {
+                  res = SQC_RESULT_INVALID_STATE;
+                }
                 break;
               }
             } else {

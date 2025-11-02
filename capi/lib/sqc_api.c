@@ -601,7 +601,7 @@ int sqcFinalize(sqcInitOptions *opt)
 #ifdef USE_PYTHON
     Py_XDECREF(mng->pyLoads);
     Py_XDECREF(mng->pyDumps);
-    Py_XDECREF(mng->pyTranspiler);
+    //Py_XDECREF(mng->pyTranspiler);
     Py_Finalize();
     free(mng);
     mng = NULL;
