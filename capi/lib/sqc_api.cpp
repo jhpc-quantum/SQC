@@ -59,7 +59,7 @@ int charncmp(char *s1, char *s2, int n)
 }
 
 /*
- * SQCQCRun Wrapper for TKET
+ * SQCQCRun Wrapper for TKET/QISKIT
  */
 int sqcQTMQCRunTket(sqcQC* qcHandle, sqcBackend qc_type, sqcRunOptions options, int *len, char **result)
 {
@@ -104,9 +104,13 @@ int sqcQTMQCRunTket(sqcQC* qcHandle, sqcBackend qc_type, sqcRunOptions options, 
       return res;
     }
     case SQC_RPC_SCHED_QC_TYPE_IBM_DACC: {
-      fprintf(stderr,"ERROR(%s):qc_type = %d is not supported yet\n",__func__,qc_type);
-      res = SQC_RESULT_UNSUPPORTED;
-      break;
+      sqcOut r;
+      res = sqcQCRun(qcHandle, qc_type, options, &r);
+      *len = r.n;
+      *result = (char *)malloc(sizeof(char)*(*len+1));
+      strcpy(*result, r.result);
+      free(r.result);
+      return res;
     }
     case SQC_RPC_SCHED_QC_TYPE_DUMMY: {
       fprintf(stderr,"ERROR(%s):qc_type = %d is unknown\n",__func__,qc_type);
@@ -368,16 +372,16 @@ int sqcQCRun(sqcQC* qcHandle, sqcBackend qc_type, sqcRunOptions opt, sqcOut *res
       break;
     }
     case SQC_RPC_SCHED_QC_TYPE_QTM_GRPC: {
-     res = u_subcmd_submit((rpc_auth_method)opt.auth_method, opt.priority, qasm_str.c_str(), opt.nshots, qc_type, "test", result);
+      res = u_subcmd_submit((rpc_auth_method)opt.auth_method, opt.priority, qasm_str.c_str(), opt.nshots, qc_type, "test", result);
       return res;
     }
     case SQC_RPC_SCHED_QC_TYPE_QTM_SIM_GRPC: {
-     res = u_subcmd_submit((rpc_auth_method)opt.auth_method, opt.priority, qasm_str.c_str(), opt.nshots, qc_type, "test", result);
-     return res;
+      res = u_subcmd_submit((rpc_auth_method)opt.auth_method, opt.priority, qasm_str.c_str(), opt.nshots, qc_type, "test", result);
+      return res;
     }
     case SQC_RPC_SCHED_QC_TYPE_IBM_DACC: {
-     res = u_subcmd_submit((rpc_auth_method)opt.auth_method, opt.priority, qasm_str.c_str(), opt.nshots, qc_type, "test", result);
-     return res;
+      res = u_subcmd_submit((rpc_auth_method)opt.auth_method, opt.priority, qasm_str.c_str(), opt.nshots, qc_type, "test", result);
+      return res;
     }
     case SQC_RPC_SCHED_QC_TYPE_DUMMY: {
       fprintf(stderr,"ERROR(%s):qc_type = %d is unknown\n",__func__,qc_type);
