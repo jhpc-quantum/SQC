@@ -167,16 +167,93 @@ Examples of each output format are shown below.
    ```
    {
       c    : "00"
-      cx    : "0"
    }
    {
       c    : "11"
-      cx    : "1"
    }
-   ...
+   {
+      c    : "11"
+   }
+   {
+      c    : "11"
+   }
+   {
+      c    : "00"
+   }
+   {
+      c    : "11"
+   }
+   {
+      c    : "11"
+   }
+   {
+      c    : "11"
+   }
+   {
+      c    : "11"
+   }
+   {
+      c    : "11"
+   }
    ```
    "ibm-kobe-dacc"
    ```
+   {
+   "metadata": {
+   "execution": {
+      "execution_spans": [
+      [
+      {
+         "date": "2025-10-27T06:15:03.863615"
+      },
+      {
+         "date": "2025-10-27T06:15:04.781847"
+      },
+      {
+         "0": [
+         [
+         10
+         ],
+         [
+         0,
+         1
+         ],
+         [
+         0,
+         10
+         ]
+         ]
+      }
+      ]
+      ]
+   },
+   "version": 2
+   },
+   "results": [
+   {
+      "data": {
+      "c": {
+      "num_bits": 2,
+      "samples": [
+         "0x3",
+         "0x3",
+         "0x0",
+         "0x3",
+         "0x3",
+         "0x0",
+         "0x3",
+         "0x3",
+         "0x3",
+         "0x3"
+      ]
+      }
+      },
+      "metadata": {
+      "circuit_metadata": {}
+      }
+   }
+   ]
+   }
    ```
 
 **9) sqcInputKind**
@@ -260,7 +337,7 @@ The following table lists the members of the structure.
 |SQC_RESULT_INTERRUPTED||
 |SQC_RESULT_TEMPORARY_UNAVAILABLE||
 |SQC_RESULT_ANY_RUNTIME_ERROR||
-|SQC_RESULT_AUTHENTICATION_ERROR||
+|SQC_RESULT_AUTHENTICATION_ERROR| The token has expired or is unusable. |
 |SQC_RESULT_INVALID_CREDENTIAL||
 |SQC_RESULT_NOT_A_DIRECTORY||
 |SQC_RESULT_IS_A_DIRECTORY||
