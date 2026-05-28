@@ -1,22 +1,13 @@
-
-#import sys
-#import datetime as dt
 import json
-#import uuid
-#import requests
-#import boto3
-#import numpy as np
 from qiskit import qasm3
-#from qiskit.circuit.library import IQP
-#from qiskit.quantum_info import random_hermitian
 from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
-#from qiskit_ibm_runtime.utils import RuntimeEncoder
 from qiskit_ibm_runtime.utils.backend_converter import convert_to_target
 from qiskit_ibm_runtime.models import BackendProperties, BackendConfiguration
 
 def test(conf, prop, qasm3_str):
-  conf_json = json.loads(conf)
+  #print(conf)
   prop_json = json.loads(prop)
+  conf_json = json.loads(conf)
   backend_conf = BackendConfiguration.from_dict(conf_json)
   backend_prop = BackendProperties.from_dict(prop_json)
 
@@ -25,6 +16,7 @@ def test(conf, prop, qasm3_str):
     optimization_level=1,
     target=target,
   )
+
   num_qubits = backend_conf.num_qubits;
   circuit = qasm3.loads(qasm3_str)
   isa_circuit = pm.run(circuit)
