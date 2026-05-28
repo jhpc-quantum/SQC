@@ -1,10 +1,9 @@
 
-
 /// \file sqc_api.c
 /// \brief API to generate qasm3
 ///
 /// Copyright (c) RIKEN, Japan. All rights reserved.
-/// 
+///
 /// \note
 /// - When outputting an error, it does not indicate which API it occurred in.
 /// - Write the following two lines for gate functions.
@@ -97,7 +96,7 @@ int sqcInitialize(sqcInitOptions *opt)
     if(PyErr_Occurred()){
         PyErr_Print();
     }
- 
+
     /*
     mng->pyTranspiler = PyObject_GetAttrString(pyQiskitCompiler, "transpile");
     if(PyErr_Occurred()){
@@ -143,10 +142,10 @@ void sqcReadQasmFile(char **ptr, const char *fname, int maxlen)
   if(!len){
     printf("Failed to read %s\n",fname);
     exit(1);
-  }   
+  }
 
   fclose(fp);
-  
+
 }
 
 // Free the memory of the circuit information
@@ -416,7 +415,7 @@ int sqcStoreQCtoMemory(sqcQC* qcHandle, sqcBackend backend, void* address, size_
 int sqcConvQASMtoMemory(sqcQC* qcHandle, sqcBackend backend, void* address, size_t size)
 {
     if(qcHandle->pyTranspiledQuantumCircuit == NULL && qcHandle->ngates == 0){
-#ifdef DEBUG_ERROR_STOP   
+#ifdef DEBUG_ERROR_STOP
         printf("error: %s: This function is not available because there is no QuantumCircuit.\n", __func__);
         exit(1);
 #endif
@@ -433,7 +432,7 @@ int sqcConvQASMtoMemory(sqcQC* qcHandle, sqcBackend backend, void* address, size
         if(PyErr_Occurred()){
             PyErr_Print();
         }
-        
+
         const char* qasmStrTranspiled = PyUnicode_AsUTF8(pyTranspiledStr);
         if(PyErr_Occurred()){
             PyErr_Print();
@@ -475,7 +474,7 @@ int sqcConvQASMtoMemory(sqcQC* qcHandle, sqcBackend backend, void* address, size
         }
         memcpy(address, tmpbuf, buflen);
         free(tmpbuf);
-        
+
     }
     return (int)buflen;
 
@@ -489,13 +488,13 @@ int sqcStoreQC(sqcQC* qcHandle, FILE* file)
 
 int sqcConvQASM(sqcQC* qcHandle, FILE* file)
 {
-    if(qcHandle->pyTranspiledQuantumCircuit == NULL && qcHandle->ngates == 0){    
-#ifdef DEBUG_ERROR_STOP 
+    if(qcHandle->pyTranspiledQuantumCircuit == NULL && qcHandle->ngates == 0){
+#ifdef DEBUG_ERROR_STOP
         printf("error: %s: This function is not available because there is no QuantumCircuit.\n", __func__);
         exit(1);
 #endif
     }
-    
+
     if (file == NULL) {
         // Error return if file handler passed by user is NULL.
         printf("error: %s: Specified file handle is NULL.\n", __func__);
@@ -508,7 +507,7 @@ int sqcConvQASM(sqcQC* qcHandle, FILE* file)
         if(PyErr_Occurred()){
             PyErr_Print();
         }
-        
+
         const char* qasmStrTranspiled = PyUnicode_AsUTF8(pyTranspiledStr);
         if(PyErr_Occurred()){
             PyErr_Print();
@@ -535,6 +534,7 @@ int sqcConvQASM(sqcQC* qcHandle, FILE* file)
 void sqcTranspile(sqcQC* qcHandle, sqcBackend kind, sqcTranspileOptions options)
 {
     char* qasmStr;
+    int res;
 #ifdef USE_PYTHON
     // If there is already a PyObject, release it
     Py_XDECREF(qcHandle->pyTranspiledQuantumCircuit);
@@ -545,7 +545,11 @@ void sqcTranspile(sqcQC* qcHandle, sqcBackend kind, sqcTranspileOptions options)
       case SQC_RPC_SCHED_QC_TYPE_IBM_DACC:
         if(qcHandle->backend_config_json==NULL ||
            qcHandle->backend_props_json ==NULL) {
-          sqcIbmdTranspileInfo(qcHandle, kind);
+          res = sqcIbmdTranspileInfo(qcHandle, kind);
+          if (res != 0) {
+            fprintf(stderr,"error %s: An error occurred while getting information for transpilation \n", __func__);
+            exit(1);
+          }
         }
         // DEBUG
         break;
@@ -565,7 +569,7 @@ void sqcTranspile(sqcQC* qcHandle, sqcBackend kind, sqcTranspileOptions options)
 
     PyObject *sys  = PyImport_ImportModule("sys");
     PyObject *path = PyObject_GetAttrString(sys, "path");
-    PyList_Append(path, PyUnicode_FromString("<your path of gen_sampler.py>")); 
+    PyList_Append(path, PyUnicode_FromString("your path"));
     PyRun_SimpleString("import os, sys\n");
 
     PyObject *python_module = PyImport_Import(PyUnicode_DecodeFSDefault(python_file_name));
@@ -575,7 +579,7 @@ void sqcTranspile(sqcQC* qcHandle, sqcBackend kind, sqcTranspileOptions options)
     PyObject *args = PyTuple_New(3);
     PyTuple_SetItem(args, 0, PyUnicode_DecodeFSDefault(qcHandle->backend_config_json));
     PyTuple_SetItem(args, 1, PyUnicode_DecodeFSDefault(qcHandle->backend_props_json));
-    PyTuple_SetItem(args, 2, PyUnicode_DecodeFSDefault(qcHandle->qasm));
+    PyTuple_SetItem(args, 2, PyUnicode_DecodeFSDefault(qasmStr));
     if(PyErr_Occurred()){ PyErr_Print(); }
     PyObject *python_res = PyObject_Call(python_func, args, NULL);
     if(PyErr_Occurred()){ PyErr_Print(); }
@@ -584,7 +588,7 @@ void sqcTranspile(sqcQC* qcHandle, sqcBackend kind, sqcTranspileOptions options)
     if(PyErr_Occurred()){ PyErr_Print(); }
     char *result = PyBytes_AsString(str);
     if(PyErr_Occurred()){ PyErr_Print(); }
-    free(qcHandle->qasm);
+    free(qasmStr);
     int len = strlen(result);
     qcHandle->qasm = (char *)malloc(sizeof(char)*(len+1));
     strcpy(qcHandle->qasm, result);
@@ -613,7 +617,7 @@ int sqcFinalize(sqcInitOptions *opt)
 /// \brief Internal function to generate OpenQASM string from quantum circuit IR
 /// \details  Internal function used to generate OpenQASM strings from quantum circuit IR.
 ///           Not exposed as I/F of C-API.
-///           Traverses the gate[n] of the quantum circuit IR in sequence and 
+///           Traverses the gate[n] of the quantum circuit IR in sequence and
 ///           concatenates the strings corresponding to each operation.
 ///
 /// \param [in] qcHandle quantum circuit IR
@@ -633,7 +637,7 @@ int sqcFinalize(sqcInitOptions *opt)
 char* gateInfo2qasm3(sqcQC* qcHandle)
 {
     char       t[65536];
-    char       u[65536];
+    //char       u[65536];
     gateInfo *g;
     unsigned int useECRGate = 0;
 
@@ -701,7 +705,7 @@ char* gateInfo2qasm3(sqcQC* qcHandle)
                             "rzx_2(-pi/4) _gate_q_0, _gate_q_1;\n"
                             "}\n");
                     useECRGate++;
-                    strcat(s, t);     
+                    strcat(s, t);
                 }
                 sprintf(t, "ecr q[%d], q[%d];\n", g->iarg[0], g->iarg[1]);
                 break;
@@ -710,7 +714,7 @@ char* gateInfo2qasm3(sqcQC* qcHandle)
                 break;
             case IDGate:
                 sprintf(t, "id q[%d];\n", g->iarg[0]);
-                break;  
+                break;
             case Delay:
             case DelayAll:
                 {
@@ -738,7 +742,7 @@ char* gateInfo2qasm3(sqcQC* qcHandle)
                             break;
                     }
                 }
-                break; 
+                break;
             case Reset:
                 sprintf(t, "reset q[%d];\n", g->iarg[0]);
                 break;
@@ -750,7 +754,7 @@ char* gateInfo2qasm3(sqcQC* qcHandle)
                 break;
             case BarrierAll:
                 sprintf(t, "barrier q;\n");
-                break; 
+                break;
             case Measure:
                 sprintf(t, "c[%d] = measure q[%d];\n",g->iarg[0],g->iarg[0]);
                 /*
@@ -774,7 +778,7 @@ char* gateInfo2qasm3(sqcQC* qcHandle)
 char* gateInfo2qasm2(sqcQC* qcHandle)
 {
     char       t[65536];
-    char       u[65536];
+    //char       u[65536];
     gateInfo *g;
     unsigned int useECRGate = 0;
 
@@ -842,7 +846,7 @@ char* gateInfo2qasm2(sqcQC* qcHandle)
                             "rzx_2(-pi/4) _gate_q_0, _gate_q_1;\n"
                             "}\n");
                     useECRGate++;
-                    strcat(s, t);     
+                    strcat(s, t);
                 }
                 sprintf(t, "ecr q[%d], q[%d];\n", g->iarg[0], g->iarg[1]);
                 break;
@@ -851,10 +855,10 @@ char* gateInfo2qasm2(sqcQC* qcHandle)
                 break;
             case IDGate:
                 sprintf(t, "id q[%d];\n", g->iarg[0]);
-                break;  
+                break;
             case ZGate:
                 sprintf(t, "z q[%d];\n", g->iarg[0]);
-                break;  
+                break;
             case Reset:
                 sprintf(t, "reset q[%d];\n", g->iarg[0]);
                 break;
@@ -866,7 +870,7 @@ char* gateInfo2qasm2(sqcQC* qcHandle)
                 break;
             case BarrierAll:
                 sprintf(t, "barrier q;\n");
-                break; 
+                break;
             case Measure:
                 sprintf(t, "measure q[%d] -> c[%d];\n",g->iarg[0],g->iarg[0]);
                 break;
@@ -915,7 +919,7 @@ void            sqcInitializeRunOpt(sqcRunOptions *opt)
   opt->outFormat   = SQC_OUT_RAW;
   opt->inFormat    = SQC_IN_QASM;
 } /* sqcInitializeRunOpt */
- 
+
 void sqcPrintCidx(char *s, int n){
   for(int i=0; i<n; i++){
     printf("%d",s[i]);
@@ -932,13 +936,13 @@ void sqcPrintAllBin(char *s, int nqubits, int n)
       if((mask&bit)==0){
         printf("0");
       }else{
-        printf("1");      
+        printf("1");
       }
       count++;
       mask >>= 1;
       if(count==nqubits){
         printf("\n");
-	count = 0;
+        count = 0;
       }
     }
   }
