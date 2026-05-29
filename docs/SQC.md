@@ -19,7 +19,7 @@ List C-API and C-API-specific types available in SQC.
 | C-API | return value | arguments | abstract |
 | -- | -- | -- | -- |
 |sqcQC* sqcQuantumCircuit(int qubits)|Handle of quantum circuit|qubits : Number of qubits in a quantum circuit|Create a quantum circuit from qubits.<br>The number of classical bits is defined as the same number of qubits.|
-|void sqcDestroyQuantumCircuit(sqcQC* qcHandle)|None|qcHandle : Handle of quantum circuit|Discard the quantum circuit specified by the argument.|
+|void sqcDestroyQuantumCircuit(sqcQC* qcHandle)|None|qcHandle : Handle of quantum circuit|Destroy the quantum circuit specified by the argument.|
 
 **3) Gate and operation API**
 
@@ -59,14 +59,16 @@ Maximum number of gates and operations that can be set is 40000.
 **5) Transpile API**
 | C-API | return value | arguments | abstract |
 | -- | -- | -- | -- |
-|int sqcIbmdTranspileInfo(sqcQC* qcHandle, sqcBackend backend)|SQC_RESULT_OK(0): Correctly END<br>Negative value: Error<br>Refer to "sqcIbmdTranspileInfo, sqcQCRun" of Chapter "retun code".|qcHandle : Handle of quantum circuit<br>backend : Quantum computer or simulator running quantum circuit|Get "ibm-kobe-dacc" quantum computer information to transpile quantum circuit.|
+|int sqcIbmdTranspileInfo(sqcQC* qcHandle, sqcBackend backend)|SQC_RESULT_OK(0): Correctly END<br>Negative value: Error<br>Refer to "sqcIbmdTranspileInfo, sqcQCRun, sqcQCRunAsync, sqcQCWait" of Chapter "retun code".|qcHandle : Handle of quantum circuit<br>backend : Quantum computer or simulator running quantum circuit|Get "ibm-kobe-dacc" quantum computer information to transpile quantum circuit.|
 |void sqcTranspile(sqcQC* qcHandle, sqcBackend backend, sqcTranspileOptions options)|None|qcHandle : Handle of quantum circuit<br>backend : Quantum computer or simulator running quantum circuit<br>options : Data structure for specifying options|Get "ibm-kobe-dacc" quantum computer information and transpile the quantum circuit.<br>The available backend is "ibm-kobe-dacc" only.<br>Please specify NULL for transpile options because the options are not implemented.<br>"qiskit", "qiskit-qasm3-import", "qiskit-ibm-runtime" are necessary.|
 
 **6) Run API**
 | C-API | return value | arguments | abstract |
 | -- | -- | -- | -- |
 |void sqcInitializeRunOpt(sqcRunOptions* opt)|None|opt : pointer of sqcRunOptions |Initialize option of running quantum circuit. Initialized values are described on sqcRunOptions of Chapter "C-API-specific types".|
-|int sqcQCRun(sqcQC* qcHandle, sqcBackend backend, sqcRunOptions options, sqcOut *result)|SQC_RESULT_OK(0): Correctly END<br>Negative value: Error<br>Refer to "sqcIbmdTranspileInfo, sqcQCRun" of Chapter "retun code".|qcHandle : Handle of quantum circuit<br>backend : Quantum computer or simulator running quantum circuit<br>options : Data structure for specifying options<br>result : Pointer storing result of runnning quantum circuit.|Run quantum circuit on specified backend under specified options.<br>Refer to sqcRunOptions of Chapter "C-API-specific types".|
+|int sqcQCRun(sqcQC* qcHandle, sqcBackend backend, sqcRunOptions options, sqcOut *result)|SQC_RESULT_OK(0): Correctly END<br>Negative value: Error<br>Refer to "sqcIbmdTranspileInfo, sqcQCRun, sqcQCRunAsync, sqcQCWait" of Chapter "retun code".|qcHandle : Handle of quantum circuit<br>backend : Quantum computer or simulator running quantum circuit<br>options : Data structure for specifying options<br>result : Pointer storing result of runnning quantum circuit.|Run quantum circuit synchronously on specified backend under specified options.<br>Refer to sqcRunOptions of Chapter "C-API-specific types".|
+|int sqcQCRunAsync(sqcQC* qcHandle, sqcBackend backend, sqcRunOptions options, sqc_handle_t *hd)|SQC_RESULT_OK(0): Correctly END<br>Negative value: Error<br>Refer to "sqcIbmdTranspileInfo, sqcQCRun, sqcQCRunAsync, sqcQCWait" of Chapter "retun code".|qcHandle : Handle of quantum circuit<br>backend : Quantum computer or simulator running quantum circuit<br>options : Data structure for specifying options<br>hd : Pointer of job handle|Run quantum circuit asynchronously on specified backend under specified options.<br>Refer to sqcRunOptions of Chapter "C-API-specific types".|
+|int sqcQCWait(sqcOut *output,  sqc_handle_t hd)|SQC_RESULT_OK(0): Correctly END<br>Negative value: Error<br>Refer to "sqcIbmdTranspileInfo, sqcQCRun, sqcQCRunAsync, sqcQCWait" of Chapter "retun code".|output : Pointer storing result of runnning quantum circuit.<br>hd : Job handle|Wait unitll the job specified by "hd" ends or occurs error.|
 
 **7) Print and free up result API**
 | C-API | return value | arguments | abstract |
@@ -281,6 +283,16 @@ The following table lists the members of the structure.
 |index|char**||
 |count|int*||
 
+**11) sqc_handle_t**
+
+Structure representing job handle of JHPC Quantum.<br>
+The following table lists the members of the structure.
+
+|member|type|description|
+| -- | -- | -- |
+|session|rpc_session_client_t|Session of JHPC Quantum|
+|job_id|char*|Job ID|
+
 ## Return code
 ### sqcInitialize, sqcFinalize
 | return code | meaning |
@@ -294,7 +306,7 @@ The following table lists the members of the structure.
 | E_NULL_POINTER | Specified argument is NULL. |
 | E_SHORTAGE_SIZE | Shortage size to write OpenQASM string. |
 
-### sqcIbmdTranspileInfo, sqcQCRun
+### sqcIbmdTranspileInfo, sqcQCRun, sqcQCRunAsync, sqcQCWait
 | return code | meaning |
 | -- | -- |
 |SQC_RESULT_OK| Correctly END. |
