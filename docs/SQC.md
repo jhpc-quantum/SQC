@@ -285,12 +285,12 @@ The following table lists the members of the structure.
 
 **11) sqc_handle_t**
 
-Structure representing job handle of JHPC Quantum.<br>
+Structure representing job handle of JHPC-quantum platform.<br>
 The following table lists the members of the structure.
 
 |member|type|description|
 | -- | -- | -- |
-|session|rpc_session_client_t|Session of JHPC Quantum|
+|session|rpc_session_client_t|Session of JHPC-quantum platform|
 |job_id|char*|Job ID|
 
 ## Return code
